@@ -18,6 +18,7 @@
 class ClientModel;
 class PlatformStyle;
 class RPCTimerInterface;
+class WalletModel;
 
 namespace Ui {
     class RPCConsole;
@@ -37,12 +38,13 @@ public:
     explicit RPCConsole(const PlatformStyle *platformStyle, QWidget *parent);
     ~RPCConsole();
 
-    static bool RPCParseCommandLine(std::string &strResult, const std::string &strCommand, bool fExecute, std::string * const pstrFilteredOut = nullptr);
-    static bool RPCExecuteCommandLine(std::string &strResult, const std::string &strCommand, std::string * const pstrFilteredOut = nullptr) {
-        return RPCParseCommandLine(strResult, strCommand, true, pstrFilteredOut);
+    static bool RPCParseCommandLine(std::string &strResult, const std::string &strCommand, bool fExecute, std::string * const pstrFilteredOut = nullptr, const std::string *walletID = nullptr);
+    static bool RPCExecuteCommandLine(std::string &strResult, const std::string &strCommand, std::string * const pstrFilteredOut = nullptr, const std::string *walletID = nullptr) {
+        return RPCParseCommandLine(strResult, strCommand, true, pstrFilteredOut, walletID);
     }
 
     void setClientModel(ClientModel *model);
+    void addWallet(WalletModel * const walletModel);
 
     enum MessageClass {
         MC_ERROR,
@@ -90,7 +92,7 @@ public Q_SLOTS:
     void fontBigger();
     void fontSmaller();
     void setFontSize(int newSize);
-    
+
     /** Wallet repair options */
     void walletSalvage();
     void walletRescan();
@@ -98,7 +100,7 @@ public Q_SLOTS:
     void walletZaptxes2();
     void walletUpgrade();
     void walletReindex();
-    
+
     /** Append the message to the message widget */
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
@@ -135,7 +137,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     // For RPC command executor
     void stopExecutor();
-    void cmdRequest(const QString &command);
+    void cmdRequest(const QString &command, const QString &walletID);
     /** Get restart command-line parameters and handle restart */
     void handleRestart(QStringList args);
 
@@ -170,6 +172,7 @@ private:
     int consoleFontSize;
     QCompleter *autoCompleter;
     QThread thread;
+    QString m_last_wallet_id;
 
     /** Update UI with latest network info from model. */
     void updateNetworkState();
