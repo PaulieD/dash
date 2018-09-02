@@ -547,8 +547,48 @@ CAmount CSuperblock::GetPaymentsLimit(int nBlockHeight)
     // min subsidy for high diff networks and vice versa
     int nBits = consensusParams.fPowAllowMinDifficultyBlocks ? UintToArith256(consensusParams.powLimit).GetCompact() : 1;
     // some part of all blocks issued during the cycle goes to superblock, see GetBlockSubsidy
-    CAmount nSuperblockPartOfSubsidy = GetBlockSubsidy(nBits, nBlockHeight - 1, consensusParams, true);
-    CAmount nPaymentsLimit = nSuperblockPartOfSubsidy * consensusParams.nSuperblockCycle;
+    LOCK(cs_main);
+
+    CCoinsView *view = (CCoinsView*)pcoinsdbview;
+    std::unique_ptr<CCoinsViewCursor> pcursor(view->Cursor());
+
+
+    uint256 prevkey;
+    std::map<uint32_t, Coin> outputs;
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        COutPoint key;
+        Coin coin;
+        if (pcursor->GetKey(key) && pcursor->GetValue(coin)) {
+            if (!outputs.empty() && key.hash != prevkey) {
+                outputs.clear();
+            }
+            prevkey = key.hash;
+            outputs[key.n] = std::move(coin);
+        }
+        else {
+            return error("%s: unable to read value", __func__);
+        }
+        pcursor->Next();
+    }
+
+    // Current supply
+    CAmount nCirculatingSupply = 0;
+    for (const auto output : outputs) {
+        nCirculatingSupply += output.second.out.nValue;
+    }
+
+    // Theoretical Maximum Supply at given block
+    CAmount nMaxSupply = 0;
+    for (auto it = 0; it < nBlockHeight; it++) {
+
+        // Get CBlockIndex pointer based on iterator
+        CBlockIndex *pblock = chainActive[it];
+
+        // Add to the Max Supply the subsidy at each block
+        nMaxSupply += GetCompleteBlockSubsidy(pblock->pprev->nBits, pblock->pprev->nHeight, Params().GetConsensus);
+    }
+    CAmount nPaymentsLimit = nMaxSupply - nCirculatingSupply;
     LogPrint("gobject", "CSuperblock::GetPaymentsLimit -- Valid superblock height %d, payments max %lld\n", nBlockHeight, nPaymentsLimit);
 
     return nPaymentsLimit;
