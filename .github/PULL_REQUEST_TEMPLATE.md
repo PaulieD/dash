@@ -1,9 +1,14 @@
+<!--
+*** Please remove the following help text before submitting: ***
+
 Pull requests without a rationale and clear improvement may be closed
 immediately.
+-->
 
+<!--
 Please provide clear motivation for your patch and explain how it improves
 Dash Core user experience or Dash Core developer experience
-significantly.
+significantly:
 
 * Any test improvements or new tests that improve coverage are always welcome.
 * All other changes should have accompanying unit tests (see `src/test/`) or
