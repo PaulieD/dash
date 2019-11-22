@@ -56,7 +56,6 @@ ALLOWED_LIBRARIES = {
 'libgcc_s.so.1', # GCC base support
 'libc.so.6', # C library
 'libpthread.so.0', # threading
-'libanl.so.1', # DNS resolve
 'libm.so.6', # math library
 'librt.so.1', # real-time (clock)
 'ld-linux-x86-64.so.2', # 64-bit dynamic linker
