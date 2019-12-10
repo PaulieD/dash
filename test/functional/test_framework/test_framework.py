@@ -140,6 +140,8 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
                           help="use dash-cli instead of RPC for all commands")
         parser.add_option("--dashd-arg", dest="dashd_extra_args", default=[], type='string', action='append',
                           help="Pass extra args to all dashd instances")
+        parser.add_option("--valgrind", dest="valgrind", default=False, action="store_true",
+                            help="run nodes under the valgrind memory error detector: expect at least a ~10x slowdown, valgrind 3.14 or later required")
         parser.add_option("--timeoutscale", dest="timeout_scale", default=1, type='int' ,
                           help="Scale the test timeouts by multiplying them with the here provided value (defaul: 1)")
         self.add_options(parser)
@@ -299,7 +301,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         assert_equal(len(binary), num_nodes)
         old_num_nodes = len(self.nodes)
         for i in range(num_nodes):
-            self.nodes.append(TestNode(old_num_nodes + i, get_datadir_path(self.options.tmpdir, old_num_nodes + i), self.extra_args_from_options, chain=self.chain, rpchost=rpchost, timewait=timewait, bitcoind=binary[i], bitcoin_cli=self.options.bitcoincli, stderr=stderr, mocktime=self.mocktime, coverage_dir=self.options.coveragedir, extra_conf=extra_confs[i], extra_args=extra_args[i], use_cli=self.options.usecli))
+            self.nodes.append(TestNode(old_num_nodes + i, get_datadir_path(self.options.tmpdir, old_num_nodes + i), self.extra_args_from_options, chain=self.chain, rpchost=rpchost, timewait=timewait, bitcoind=binary[i], bitcoin_cli=self.options.bitcoincli, stderr=stderr, mocktime=self.mocktime, coverage_dir=self.options.coveragedir, extra_conf=extra_confs[i], extra_args=extra_args[i], use_cli=self.options.usecli, use_valgrind=self.options.valgrind))
 
     def start_node(self, i, *args, **kwargs):
         """Start a dashd"""
