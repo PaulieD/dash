@@ -248,10 +248,6 @@ class SendHeadersTest(BitcoinTestFramework):
         inv_node.wait_for_verack()
         test_node.wait_for_verack()
 
-        # Ensure verack's have been processed by our peer
-        inv_node.sync_with_ping()
-        test_node.sync_with_ping()
-
         self.test_null_locators(test_node, inv_node)
         self.test_nonnull_locators(test_node, inv_node)
 
