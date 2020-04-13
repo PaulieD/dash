@@ -4,12 +4,6 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Utilities for manipulating blocks and transactions."""
 
-from .address import (
-    key_to_p2sh_p2wpkh,
-    key_to_p2wpkh,
-    script_to_p2sh_p2wsh,
-    script_to_p2wsh,
-)
 from .mininode import *
 from .script import (
     CScript,
