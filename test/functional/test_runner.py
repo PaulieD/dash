@@ -525,7 +525,7 @@ def check_script_prefixes():
     # LEEWAY is provided as a transition measure, so that pull-requests
     # that introduce new tests that don't conform with the naming
     # convention don't immediately cause the tests to fail.
-    LEEWAY = 10
+    LEEWAY = 21
 
     good_prefixes_re = re.compile("(example|feature|interface|mempool|mining|p2p|rpc|wallet)_")
     bad_script_names = [script for script in ALL_SCRIPTS if good_prefixes_re.match(script) is None]
