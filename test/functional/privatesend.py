@@ -61,11 +61,9 @@ class PrivateSendMixingTest(DashTestFramework):
 
     def run_test(self):
 
-        self.nodes[0].generate(3)
-
         self.log.info("Give a balance to each node")
-        for node in self.nodes:
-            node.generate(1)
+        for i in range(0, 3):
+            self.nodes[i].generate(1)
             self.sync_all()
 
         self.log.info("Set up settings and start mixing on each node")
