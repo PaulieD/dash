@@ -75,6 +75,9 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[0].privatesend("start")
         self.nodes[1].privatesend("start")
         self.nodes[2].privatesend("start")
+        asset_equal(self.nodes[0].getprivatesendinfo()["running"], True)
+        asset_equal(self.nodes[1].getprivatesendinfo()["running"], True)
+        asset_equal(self.nodes[2].getprivatesendinfo()["running"], True)
 
         self.log.info("Wait for first round of mixing to happen")
         sleep(10)
