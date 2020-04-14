@@ -5,6 +5,7 @@
 
 from test_framework.test_framework import BitcoinTestFramework, DashTestFramework
 from test_framework.util import assert_equal, assert_greater_than
+from time import sleep
 
 '''
 privatesend.py
