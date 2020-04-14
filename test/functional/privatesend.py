@@ -67,9 +67,12 @@ class PrivateSendMixingTest(DashTestFramework):
 
 
         self.log.info("Set up settings and start mixing on each node")
-        for node in self.nodes:
-            node.setprivatesendrounds(2)
-            node.privatesend("start")
+        self.nodes[0].setprivatesendrounds(2)
+        self.nodes[1].setprivatesendrounds(2)
+        self.nodes[2].setprivatesendrounds(2)
+        self.nodes[0].privatesend("start")
+        self.nodes[1].privatesend("start")
+        self.nodes[2].privatesend("start")
 
         self.log.info("Wait for first round of mixing to happen")
         self.bump_mocktime(30)
