@@ -61,24 +61,26 @@ class PrivateSendMixingTest(DashTestFramework):
 
     def run_test(self):
 
-        # Give a balance to each node
+        self.log.info("Give a balance to each node")
         for node in self.nodes:
             node.generate(1)
-            self.sync_all();
-        # Set up settings and start mixing on each node
+            self.sync_all()
+
+        self.log.info("Set up settings and start mixing on each node")
         for node in self.nodes:
             node.setprivatesendrounds(2)
             node.privatesend("start")
 
-        # Wait for one round of mixing to happen
+        self.log.info("Wait for first round of mixing to happen")
         self.bump_mocktime(30)
         # Generate a block allowing a second round to happen
+        self.log.info("Generate a block allowing a second round to happen")
         self.nodes[0].generate(1)
-        # Wait for second round to happen
+        self.log.info("Wait for second round of mixing to happen")
         self.bump_mocktime(30)
         self.nodes[0].generate(1)
 
-        # Check that all nodes have a PS balance
+        self.log.info("Verify that all nodes have a non-zero PrivateSend balance")
         for node in self.nodes:
             assert_greater_than(node.getwalletinfo[privatesendbalance] > 0)
 
