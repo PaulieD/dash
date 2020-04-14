@@ -63,6 +63,21 @@ class PrivateSendMixingTest(DashTestFramework):
     def run_test(self):
 
         self.log.info("Give a balance to each node")
+
+        self.log.info(self.nodes[0].masternode('status'))
+        self.log.info(self.nodes[1].masternode('status'))
+        self.log.info(self.nodes[2].masternode('status'))
+        self.log.info(self.nodes[3].masternode('status'))
+        self.log.info(self.nodes[4].masternode('status'))
+        self.log.info(self.nodes[5].masternode('status'))
+        self.log.info(self.nodes[6].masternode('status'))
+        self.log.info(self.nodes[7].masternode('status'))
+        self.log.info(self.nodes[8].masternode('status'))
+        self.log.info(self.nodes[9].masternode('status'))
+        self.log.info(self.nodes[10].masternode('status'))
+        self.log.info(self.nodes[11].masternode('status'))
+
+
         self.nodes[0].sendtoaddress(self.nodes[10].getnewaddress(), 10)
         self.nodes[0].sendtoaddress(self.nodes[11].getnewaddress(), 10)
         self.nodes[0].sendtoaddress(self.nodes[12].getnewaddress(), 10)
