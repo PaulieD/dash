@@ -63,21 +63,22 @@ class PrivateSendMixingTest(DashTestFramework):
     def run_test(self):
 
         self.log.info("Give a balance to each node")
-        self.nodes[0].sendtoaddress(self.nodes[1].getnewaddress(), 10)
-        self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 10)
+        self.nodes[0].sendtoaddress(self.nodes[10].getnewaddress(), 10)
+        self.nodes[0].sendtoaddress(self.nodes[11].getnewaddress(), 10)
+        self.nodes[0].sendtoaddress(self.nodes[12].getnewaddress(), 10)
         self.nodes[0].generate(1)
         self.sync_all()
 
         self.log.info("Set up settings and start mixing on each node")
-        self.nodes[0].setprivatesendrounds(2)
-        self.nodes[1].setprivatesendrounds(2)
-        self.nodes[2].setprivatesendrounds(2)
-        self.nodes[0].privatesend("start")
-        self.nodes[1].privatesend("start")
-        self.nodes[2].privatesend("start")
-        assert_equal(self.nodes[0].getprivatesendinfo()['running'], True)
-        assert_equal(self.nodes[1].getprivatesendinfo()['running'], True)
-        assert_equal(self.nodes[2].getprivatesendinfo()['running'], True)
+        self.nodes[10].setprivatesendrounds(2)
+        self.nodes[11].setprivatesendrounds(2)
+        self.nodes[12].setprivatesendrounds(2)
+        self.nodes[10].privatesend("start")
+        self.nodes[11].privatesend("start")
+        self.nodes[12].privatesend("start")
+        assert_equal(self.nodes[10].getprivatesendinfo()['running'], True)
+        assert_equal(self.nodes[11].getprivatesendinfo()['running'], True)
+        assert_equal(self.nodes[12].getprivatesendinfo()['running'], True)
 
         self.log.info("Wait for first round of mixing to happen")
         sleep(10)
@@ -91,9 +92,9 @@ class PrivateSendMixingTest(DashTestFramework):
         self.sync_all()
 
         self.log.info("Verify that all nodes have a non-zero PrivateSend balance")
-        assert_greater_than(self.nodes[0].getwalletinfo()["privatesend_balance"], 0)
-        assert_greater_than(self.nodes[1].getwalletinfo()["privatesend_balance"], 0)
-        assert_greater_than(self.nodes[2].getwalletinfo()["privatesend_balance"], 0)
+        assert_greater_than(self.nodes[10].getwalletinfo()["privatesend_balance"], 0)
+        assert_greater_than(self.nodes[11].getwalletinfo()["privatesend_balance"], 0)
+        assert_greater_than(self.nodes[12].getwalletinfo()["privatesend_balance"], 0)
 
 if __name__ == '__main__':
     PrivateSendMixingTest().main()
