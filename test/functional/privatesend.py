@@ -12,7 +12,7 @@ privatesend.py
 Tests PrivateSend basic RPC
 '''
 
-class PrivateSendTest(BitcoinTestFramework):
+class PrivateSendBasicTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
 
@@ -55,6 +55,34 @@ class PrivateSendTest(BitcoinTestFramework):
         ps_info = self.nodes[0].getprivatesendinfo()
         assert_equal(ps_info['max_rounds'], 5)
 
+class PrivateSendMixingTest(DashTestFramework):
+    def set_test_params(self):
+        self.set_dash_test_params(3, 1, fast_dip3_enforcement=True)
+
+    def run_test(self):
+
+        # Give a balance to each node
+        for node in self.nodes:
+            node.generate(1)
+            self.sync_all();
+        # Set up settings and start mixing on each node
+        for node in self.nodes:
+            node.setprivatesendrounds(2)
+            node.privatesend("start")
+
+        # Wait for one round of mixing to happen
+        self.bump_mocktime(30)
+        # Generate a block allowing a second round to happen
+        self.nodes[0].generate(1)
+        # Wait for second round to happen
+        self.bump_mocktime(30)
+        self.nodes[0].generate(1)
+
+        # Check that all nodes have a PS balance
+        for node in self.nodes:
+            assert_greater_than(node.getwalletinfo[privatesendbalance] > 0)
+
 
 if __name__ == '__main__':
-    PrivateSendTest().main()
+    PrivateSendBasicTest().main()
+    PrivateSendMixingTest().main()
