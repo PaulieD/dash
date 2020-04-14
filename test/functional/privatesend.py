@@ -82,7 +82,7 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[2].setprivatesendrounds(2)
         self.nodes[0].privatesend("start")
         self.nodes[1].privatesend("start")
-        self.nodes[2].privatesend("start")
+        self.log.info(self.nodes[2].privatesend("start"))
         assert_equal(self.nodes[0].getprivatesendinfo()['running'], True)
         assert_equal(self.nodes[1].getprivatesendinfo()['running'], True)
         assert_equal(self.nodes[2].getprivatesendinfo()['running'], True)
