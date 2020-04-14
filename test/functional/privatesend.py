@@ -65,7 +65,7 @@ class PrivateSendMixingTest(DashTestFramework):
         self.log.info("Give a balance to each node")
 
         #self.log.info(self.nodes[0].masternode('status'))
-        self.log.info(self.nodes[1].masternode('status'))
+        #self.log.info(self.nodes[1].masternode('status'))
         self.log.info(self.nodes[2].masternode('status'))
         # self.log.info(self.nodes[3].masternode('status'))
         # self.log.info(self.nodes[4].masternode('status'))
