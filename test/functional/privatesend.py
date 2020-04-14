@@ -76,13 +76,15 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[0].generate(1)
         self.sync_all()
 
+        sleep(5)
+
         self.log.info("Set up settings and start mixing on each node")
-        self.nodes[0].setprivatesendrounds(2)
+        self.log.info(self.nodes[0].setprivatesendrounds(2))
         self.nodes[1].setprivatesendrounds(2)
         self.nodes[2].setprivatesendrounds(2)
-        self.nodes[0].privatesend("start")
+        self.log.info(self.nodes[0].privatesend("start"))
         self.nodes[1].privatesend("start")
-        self.log.info(self.nodes[2].privatesend("start"))
+        self.nodes[2].privatesend("start")
         assert_equal(self.nodes[0].getprivatesendinfo()['running'], True)
         assert_equal(self.nodes[1].getprivatesendinfo()['running'], True)
         assert_equal(self.nodes[2].getprivatesendinfo()['running'], True)
