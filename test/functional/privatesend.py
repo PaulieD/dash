@@ -86,5 +86,5 @@ class PrivateSendMixingTest(DashTestFramework):
 
 
 if __name__ == '__main__':
-    PrivateSendBasicTest().main()
     PrivateSendMixingTest().main()
+    PrivateSendBasicTest().main()
