@@ -57,7 +57,7 @@ class PrivateSendBasicTest(BitcoinTestFramework):
 
 class PrivateSendMixingTest(DashTestFramework):
     def set_test_params(self):
-        self.set_dash_test_params(4, 1, fast_dip3_enforcement=True)
+        self.set_dash_test_params(4, 10, fast_dip3_enforcement=True)
 
     def run_test(self):
 
@@ -76,13 +76,13 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[2].privatesend("start")
 
         self.log.info("Wait for first round of mixing to happen")
-        self.bump_mocktime(120)
+        sleep(10)
         # Generate a block allowing a second round to happen
         self.log.info("Generate a block allowing a second round to happen")
         self.nodes[0].generate(1)
         self.sync_all()
         self.log.info("Wait for second round of mixing to happen")
-        self.bump_mocktime(120)
+        sleep(10)
         self.nodes[0].generate(1)
         self.sync_all()
 
