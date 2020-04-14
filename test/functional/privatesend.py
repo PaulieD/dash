@@ -84,7 +84,7 @@ class PrivateSendMixingTest(DashTestFramework):
         self.log.info("Wait for second round of mixing to happen")
         self.bump_mocktime(120)
         self.nodes[0].generate(1)
-    self.sync_all()
+        self.sync_all()
 
         self.log.info("Verify that all nodes have a non-zero PrivateSend balance")
         assert_greater_than(self.nodes[0].getwalletinfo()["privatesend_balance"], 0)
