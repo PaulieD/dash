@@ -64,18 +64,10 @@ class PrivateSendMixingTest(DashTestFramework):
 
         self.log.info("Give a balance to each node")
 
-        #self.log.info(self.nodes[0].masternode('status'))
-        #self.log.info(self.nodes[1].masternode('status'))
-        self.log.info(self.nodes[2].masternode('status'))
-        # self.log.info(self.nodes[3].masternode('status'))
-        # self.log.info(self.nodes[4].masternode('status'))
-        # self.log.info(self.nodes[5].masternode('status'))
-        # self.log.info(self.nodes[6].masternode('status'))
-        # self.log.info(self.nodes[7].masternode('status'))
-        # self.log.info(self.nodes[8].masternode('status'))
-        # self.log.info(self.nodes[9].masternode('status'))
-        # self.log.info(self.nodes[10].masternode('status'))
-        # self.log.info(self.nodes[11].masternode('status'))
+        assert_raises_rpc_error(-32603, "This is not a masternode", self.nodes[0].masternode('status'))
+        assert_raises_rpc_error(-32603, "This is not a masternode", self.nodes[1].masternode('status'))
+        assert_raises_rpc_error(-32603, "This is not a masternode", self.nodes[2].masternode('status'))
+        assert_raises_rpc_error(-32603, "This is not a masternode", self.nodes[3].masternode('status'))
 
 
         self.nodes[0].sendtoaddress(self.nodes[10].getnewaddress(), 10)
