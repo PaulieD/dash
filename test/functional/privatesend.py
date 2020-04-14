@@ -69,6 +69,10 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[2].generate(1)
         self.sync_all()
 
+        for node in self.nodes:
+            node.generate(1)
+            self.sync_all()
+
         self.log.info("Set up settings and start mixing on each node")
         for node in self.nodes:
             node.setprivatesendrounds(2)
