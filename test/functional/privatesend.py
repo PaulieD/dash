@@ -57,7 +57,7 @@ class PrivateSendBasicTest(BitcoinTestFramework):
 
 class PrivateSendMixingTest(DashTestFramework):
     def set_test_params(self):
-        self.set_dash_test_params(4, 10, fast_dip3_enforcement=True)
+        self.set_dash_test_params(13, 10, fast_dip3_enforcement=True)
 
     def run_test(self):
 
