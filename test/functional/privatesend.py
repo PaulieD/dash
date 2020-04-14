@@ -82,6 +82,9 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[0].setprivatesendrounds(2)
         self.nodes[1].setprivatesendrounds(2)
         self.nodes[2].setprivatesendrounds(2)
+
+        sleep(5)
+
         self.log.info(self.nodes[0].privatesend("start"))
         self.log.info(self.nodes[1].privatesend("start"))
         self.log.info(self.nodes[2].privatesend("start"))
