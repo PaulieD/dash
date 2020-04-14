@@ -84,9 +84,9 @@ class PrivateSendMixingTest(DashTestFramework):
         self.nodes[0].generate(1)
 
         self.log.info("Verify that all nodes have a non-zero PrivateSend balance")
-        assert_greater_than(self.nodes[0].getwalletinfo["privatesendbalance"] > 0)
-        assert_greater_than(self.nodes[1].getwalletinfo["privatesendbalance"] > 0)
-        assert_greater_than(self.nodes[2].getwalletinfo["privatesendbalance"] > 0)
+        assert_greater_than(self.nodes[0].getwalletinfo["privatesendbalance"], 0)
+        assert_greater_than(self.nodes[1].getwalletinfo["privatesendbalance"], 0)
+        assert_greater_than(self.nodes[2].getwalletinfo["privatesendbalance"], 0)
 
 if __name__ == '__main__':
     PrivateSendMixingTest().main()
