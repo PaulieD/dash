@@ -122,7 +122,7 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("nPruneSize", 2);
     // Convert prune size to MB:
     const uint64_t nPruneSizeMB = settings.value("nPruneSize").toInt() * 1000;
-    if (!m_node.softSetArg("-prune", settings.value("bPrune").toBool() ? std::to_string(nPruneSizeMB) : "0")) {
+    if (!gArgs.softSetArg("-prune", settings.value("bPrune").toBool() ? std::to_string(nPruneSizeMB) : "0")) {
       addOverriddenOption("-prune");
     }
 
