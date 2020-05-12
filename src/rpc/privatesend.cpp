@@ -73,6 +73,68 @@ UniValue privatesend(const JSONRPCRequest& request)
 
     return "Unknown command, please see \"help privatesend\"";
 }
+
+UniValue localmix(const JSONRPCRequest& request)
+{
+    CWallet* const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+                // TODO
+            "privatesend \"command\"\n"
+            "\nArguments:\n"
+            "1. \"command\"        (string or set of strings, required) The command to execute\n"
+            "\nAvailable commands:\n"
+            "  start       - Start mixing\n"
+            "  stop        - Stop mixing\n"
+            "  reset       - Reset mixing\n"
+        );
+
+    ObserveSafeMode();
+
+    if (fMasternodeMode)
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Client-side mixing is not supported on masternodes");
+
+    if (!privateSendClient.fEnablePrivateSend) {
+        if (fLiteMode) {
+            // mixing is disabled by default in lite mode
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Mixing is disabled in lite mode, use -enableprivatesend command line option to enable mixing again");
+        } else if (!gArgs.GetBoolArg("-enableprivatesend", true)) {
+            // otherwise it's on by default, unless cmd line option says otherwise
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Mixing is disabled via -enableprivatesend=0 command line option, remove it to enable mixing again");
+        } else {
+            // neither litemode nor enableprivatesend=false case,
+            // most likely something bad happened and we disabled it while running the wallet
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Mixing is disabled due to some internal error");
+        }
+    }
+
+    if (request.params[0].get_str() == "start") {
+        {
+            LOCK(pwallet->cs_wallet);
+            if (pwallet->IsLocked(true))
+                throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please unlock wallet for mixing with walletpassphrase first.");
+        }
+
+        privateSendClient.fPrivateSendRunning = true;
+        bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatuses() + ", will retry"));
+    }
+
+    if (request.params[0].get_str() == "stop") {
+        privateSendClient.fPrivateSendRunning = false;
+        return "Mixing was stopped";
+    }
+
+    if (request.params[0].get_str() == "reset") {
+        privateSendClient.ResetPool();
+        return "Mixing was reset";
+    }
+
+    return "Unknown command, please see \"help privatesend\"";
+}
 #endif // ENABLE_WALLET
 
 UniValue getpoolinfo(const JSONRPCRequest& request)
@@ -158,6 +220,7 @@ static const CRPCCommand commands[] =
         { "dash",               "getprivatesendinfo",     &getprivatesendinfo,     {} },
 #ifdef ENABLE_WALLET
         { "dash",               "privatesend",            &privatesend,            {} },
+        { "dash",               "localmix",               &localmix,               {} },
 #endif // ENABLE_WALLET
 };
 
