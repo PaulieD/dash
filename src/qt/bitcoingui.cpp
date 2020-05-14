@@ -602,9 +602,9 @@ void BitcoinGUI::createToolBars()
 #endif
 
         // Add Dash logo on the right side
-        QWidget* spacer = new QWidget();
-        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        toolbar->addWidget(spacer);
+        QWidget* spacerDash = new QWidget();
+        spacerDash->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        toolbar->addWidget(spacerDash);
 
         QLabel *logoLabel = new QLabel();
         QString theme = settings.value("theme", "").toString();
