@@ -155,6 +155,7 @@ private:
         QString type;
         QString address;
         QString label;
+        QString walletName;
     };
     std::list<IncomingTransactionMessage> incomingTransactions;
     QTimer* incomingTransactionsTimer;
