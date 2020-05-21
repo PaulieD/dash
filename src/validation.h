@@ -91,7 +91,7 @@ static const unsigned int BLOCK_STALLING_TIMEOUT = 2;
  *  less than this number, we reached its tip. Changing this value is a protocol upgrade.
  *  TODO remove MAX_HEADERS_RESULTS_OLD once minimum protocol version is 70218 */
 static const unsigned int MAX_HEADERS_RESULTS_OLD = 2000;
-static const unsigned int MAX_HEADERS_RESULTS = 8000;
+static const unsigned int MAX_HEADERS_RESULTS = 32000;
 /** Maximum depth of blocks we're willing to serve as compact blocks to peers
  *  when requested. For older blocks, a regular BLOCK response will be sent. */
 static const int MAX_CMPCTBLOCK_DEPTH = 5;
