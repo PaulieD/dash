@@ -1894,7 +1894,8 @@ bool static ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::ve
             nodestate->m_last_block_announcement = GetTime();
         }
 
-        int max_headers = pfrom->nVersion < 70218 ? MAX_HEADERS_RESULTS_OLD : MAX_HEADERS_RESULTS;
+        // int max_headers = pfrom->nVersion < 70218 ? MAX_HEADERS_RESULTS_OLD : MAX_HEADERS_RESULTS;
+        int max_headers = std::max(2000,2000 * (pfrom->nVersion - 70216));
         if (nCount == max_headers) {
             // Headers message had its maximum size; the peer may have more headers.
             // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
@@ -2739,7 +2740,8 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
         // we must use CBlocks, as CBlockHeaders won't include the 0x00 nTx count at the end
         std::vector<CBlock> vHeaders;
-        int nLimit = pfrom->nVersion < 70218 ? MAX_HEADERS_RESULTS_OLD : MAX_HEADERS_RESULTS;
+        //int nLimit = pfrom->nVersion < 70218 ? MAX_HEADERS_RESULTS_OLD : MAX_HEADERS_RESULTS;
+        int nLimit = std::max(2000,2000 * (pfrom->nVersion - 70216));
         LogPrint(BCLog::NET, "getheaders %d to %s from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop.IsNull() ? "end" : hashStop.ToString(), pfrom->GetId());
         for (; pindex; pindex = chainActive.Next(pindex))
         {
@@ -3254,7 +3256,8 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
         // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
         unsigned int nCount = ReadCompactSize(vRecv);
-        int max_headers = pfrom->nVersion < 70218 ? MAX_HEADERS_RESULTS_OLD : MAX_HEADERS_RESULTS;
+        // int max_headers = pfrom->nVersion < 70218 ? MAX_HEADERS_RESULTS_OLD : MAX_HEADERS_RESULTS;
+        int max_headers = std::max(2000,2000 * (pfrom->nVersion - 70216));
         if (nCount > max_headers) {
             LOCK(cs_main);
             Misbehaving(pfrom->GetId(), 20, strprintf("headers message size = %u", nCount));
