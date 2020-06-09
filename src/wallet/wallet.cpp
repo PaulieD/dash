@@ -3811,6 +3811,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 if (pick_new_inputs) {
                     nValueIn = 0;
                     setCoins.clear();
+/*
                     if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueIn, &coin_control)) {
                         if (coin_control.nCoinType == CoinType::ONLY_NONDENOMINATED) {
                             strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction.");
@@ -3822,6 +3823,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         }
                         return false;
                     }
+*/
                 }
 
                 const CAmount nChange = nValueIn - nValueToSelect;

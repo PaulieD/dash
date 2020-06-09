@@ -215,9 +215,10 @@ static void FundSpecialTx(CWallet* pwallet, CMutableTransaction& tx, const Speci
     CCoinControl coinControl;
     coinControl.destChange = fundDest;
     coinControl.fRequireAllInputs = false;
+    coinControl.fAllowWatchOnly = true;
 
     std::vector<COutput> vecOutputs;
-    pwallet->AvailableCoins(vecOutputs);
+    pwallet->AvailableCoins(vecOutputs, true, &coinControl);
 
     for (const auto& out : vecOutputs) {
         CTxDestination txDest;
@@ -419,6 +420,7 @@ UniValue protx_register(const JSONRPCRequest& request)
     CWallet* const pwallet = GetWalletForJSONRPCRequest(request);
     bool isExternalRegister = request.params[0].get_str() == "register";
     bool isFundRegister = request.params[0].get_str() == "register_fund";
+    bool isFundExternalRegister = request.params[0].get_str() == "register_fund_external";
     bool isPrepareRegister = request.params[0].get_str() == "register_prepare";
 
     if (isFundRegister && (request.fHelp || (request.params.size() != 8 && request.params.size() != 9))) {
@@ -449,7 +451,7 @@ UniValue protx_register(const JSONRPCRequest& request)
     CProRegTx ptx;
     ptx.nVersion = CProRegTx::CURRENT_VERSION;
 
-    if (isFundRegister) {
+    if (isFundRegister || isFundExternalRegister) {
         CTxDestination collateralDest = DecodeDestination(request.params[paramIdx].get_str());
         if (!IsValidDestination(collateralDest)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("invalid collaterall address: %s", request.params[paramIdx].get_str()));
@@ -507,7 +509,7 @@ UniValue protx_register(const JSONRPCRequest& request)
     ptx.keyIDVoting = keyIDVoting;
     ptx.scriptPayout = GetScriptForDestination(payoutDest);
 
-    if (!isFundRegister) {
+    if (!(isFundRegister || isFundExternalRegister)) {
         // make sure fee calculation works
         ptx.vchSig.resize(65);
     }
@@ -535,6 +537,22 @@ UniValue protx_register(const JSONRPCRequest& request)
 
         SetTxPayload(tx, ptx);
         return SignAndSendSpecialTx(tx);
+    } if (isFundExternalRegister) {
+        uint32_t collateralIndex = (uint32_t) -1;
+        for (uint32_t i = 0; i < tx.vout.size(); i++) {
+            if (tx.vout[i].nValue == collateralAmount) {
+                collateralIndex = i;
+                break;
+            }
+        }
+        assert(collateralIndex != (uint32_t) -1);
+        ptx.collateralOutpoint.n = collateralIndex;
+
+        SetTxPayload(tx, ptx);
+
+        UniValue ret(UniValue::VOBJ);
+        ret.push_back(Pair("tx", EncodeHexTx(tx)));
+        return ret;
     } else {
         // referencing external collateral
 
@@ -1176,7 +1194,7 @@ UniValue protx(const JSONRPCRequest& request)
     }
 
 #ifdef ENABLE_WALLET
-    if (command == "register" || command == "register_fund" || command == "register_prepare") {
+    if (command == "register" || command == "register_fund" || command == "register_prepare" || command == "register_fund_external") {
         return protx_register(request);
     } else if (command == "register_submit") {
         return protx_register_submit(request);
