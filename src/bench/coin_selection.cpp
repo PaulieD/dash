@@ -42,7 +42,18 @@ static void CoinSelection(benchmark::Bench& bench)
         for (int i = 0; i < 1000; i++)
             addCoin(1000 * COIN, wallet, vCoins);
         addCoin(3 * COIN, wallet, vCoins);
+    });
 
+    // Create groups
+//    std::vector<OutputGroup> groups;
+//    for (const auto& wtx : wtxs) {
+//        COutput output(wtx.get(), 0 /* iIn */, 6 * 24 /* nDepthIn */, true /* spendable */, true /* solvable */, true /* safe */);
+//        groups.emplace_back(output.GetInputCoin(), 6, false, 0, 0);
+//    }
+
+    const CoinEligibilityFilter filter_standard(1, 6, 0);
+    const CoinSelectionParams coin_selection_params(true, 34, 148, CFeeRate(0), 0);
+    bench.run([&] {
         std::set<CInputCoin> setCoinsRet;
         CAmount nValueRet;
         bool bnb_used;

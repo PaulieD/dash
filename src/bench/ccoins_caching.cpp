@@ -76,12 +76,12 @@ static void CCoinsCaching(benchmark::Bench& bench)
     t1.vout[0].scriptPubKey << OP_1;
 
     // Benchmark.
+    const CTransaction tx_1(t1);
     bench.run([&] {
-        bool success = AreInputsStandard(t1, coins);
+        bool success = AreInputsStandard(tx_1, coins);
         assert(success);
-        CAmount value = coins.GetValueIn(t1);
-        assert(value == (50 + 21 + 22) * CENT);
     });
+    ECC_Stop();
 }
 
 BENCHMARK(CCoinsCaching);

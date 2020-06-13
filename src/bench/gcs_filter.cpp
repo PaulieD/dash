@@ -16,7 +16,7 @@ static void ConstructGCSFilter(benchmark::Bench& bench)
     }
 
     uint64_t siphash_k0 = 0;
-    bench.run([&] {
+    bench.batch(elements.size()).unit("elem").run([&] {
         GCSFilter filter(siphash_k0, 0, 20, 1 << 20, elements);
 
         siphash_k0++;
@@ -34,7 +34,7 @@ static void MatchGCSFilter(benchmark::Bench& bench)
     }
     GCSFilter filter(0, 0, 20, 1 << 20, elements);
 
-    bench.run([&] {
+    bench.unit("elem").run([&] {
         filter.Match(GCSFilter::Element());
     });
 }

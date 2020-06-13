@@ -26,7 +26,7 @@ static_assert(IS_TRIVIALLY_CONSTRUCTIBLE<trivial_t>::value,
 template <typename T>
 static void PrevectorDestructor(benchmark::Bench& bench)
 {
-    bench.run([&] {
+    bench.batch(2).run([&] {
         prevector<28, T> t0;
         prevector<28, T> t1;
         t0.resize(28);
@@ -39,7 +39,7 @@ static void PrevectorClear(benchmark::Bench& bench)
 {
     prevector<28, T> t0;
     prevector<28, T> t1;
-    bench.run([&] {
+    bench.batch(2).run([&] {
         t0.resize(28);
         t0.clear();
         t1.resize(29);
@@ -52,7 +52,7 @@ void PrevectorResize(benchmark::Bench& bench)
 {
     prevector<28, T> t0;
     prevector<28, T> t1;
-    bench.run([&] {
+    bench.batch(4).run([&] {
         t0.resize(28);
         t0.resize(0);
         t1.resize(29);
@@ -73,7 +73,7 @@ static void PrevectorDeserialize(benchmark::Bench& bench)
     for (auto x = 0; x < 101; ++x) {
         s0 << t0;
     }
-    bench.run([&] {
+    bench.batch(1000).run([&] {
         prevector<28, T> t1;
         for (auto x = 0; x < 1000; ++x) {
             s0 >> t1;
@@ -82,20 +82,22 @@ static void PrevectorDeserialize(benchmark::Bench& bench)
     });
 }
 
-#define PREVECTOR_TEST(name, nontrivops, trivops)                       \
-    static void Prevector ## name ## Nontrivial(benchmark::Bench& bench) { \
-        Prevector ## name<nontrivial_t>(bench);                         \
-    }                                                                   \
-    BENCHMARK(Prevector ## name ## Nontrivial, nontrivops);             \
-    static void Prevector ## name ## Trivial(benchmark::Bench& bench) { \
-        Prevector ## name<trivial_t>(bench);                            \
-    }                                                                   \
-    BENCHMARK(Prevector ## name ## Trivial, trivops);
+#define PREVECTOR_TEST(name)                                         \
+    static void Prevector##name##Nontrivial(benchmark::Bench& bench) \
+    {                                                                \
+        Prevector##name<nontrivial_t>(bench);                        \
+    }                                                                \
+    BENCHMARK(Prevector##name##Nontrivial);                          \
+    static void Prevector##name##Trivial(benchmark::Bench& bench)    \
+    {                                                                \
+        Prevector##name<trivial_t>(bench);                           \
+    }                                                                \
+    BENCHMARK(Prevector##name##Trivial);
 
-PREVECTOR_TEST(Clear, 80 * 1000 * 1000, 70 * 1000 * 1000)
-PREVECTOR_TEST(Destructor, 800 * 1000 * 1000, 800 * 1000 * 1000)
-PREVECTOR_TEST(Resize, 80 * 1000 * 1000, 70 * 1000 * 1000)
-PREVECTOR_TEST(Deserialize, 6800, 52000)
+PREVECTOR_TEST(Clear)
+PREVECTOR_TEST(Destructor)
+PREVECTOR_TEST(Resize)
+PREVECTOR_TEST(Deserialize)
 
 #include <vector>
 

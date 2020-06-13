@@ -23,7 +23,7 @@ static void DeserializeBlockTest(benchmark::Bench& bench)
     char a = '\0';
     stream.write(&a, 1); // Prevent compaction
 
-    bench.run([&] {
+    bench.unit("block").run([&] {
         CBlock block;
         stream >> block;
         assert(stream.Rewind(sizeof(raw_bench::block813851)));
@@ -40,7 +40,7 @@ static void DeserializeAndCheckBlockTest(benchmark::Bench& bench)
 
     const auto chainParams = CreateChainParams(CBaseChainParams::MAIN);
 
-    bench.run([&] {
+    bench.unit("block").run([&] {
         CBlock block; // Note that CBlock caches its checked state, so we need to recreate it here
         stream >> block;
         assert(stream.Rewind(sizeof(raw_bench::block813851)));

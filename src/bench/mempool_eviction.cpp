@@ -99,7 +99,7 @@ static void MempoolEviction(benchmark::Bench& bench)
     CTxMemPool pool;
     LOCK(pool.cs);
 
-    bench.run([&] {
+    bench.run([&]() NO_THREAD_SAFETY_ANALYSIS {
         AddTx(tx1, 10000LL, pool);
         AddTx(tx2, 5000LL, pool);
         AddTx(tx3, 20000LL, pool);

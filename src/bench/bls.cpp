@@ -271,7 +271,7 @@ static void BLS_Verify_Batched(benchmark::Bench& bench)
     bench.run([&] {
         j++;
         if ((j % batchSize) != 0) {
-            continue;
+            return;
         }
 
         BLSPublicKeyVector testPubKeys;
