@@ -59,7 +59,6 @@ Only supports JSON as output format.
 * pruned : (boolean) if the blocks are subject to pruning
 * pruneheight : (numeric) highest block available
 * softforks : (array) status of softforks in progress
-* bip9_softforks : (object) status of BIP9 softforks in progress
 
 #### Query UTXO set
 `GET /rest/getutxos/<checkmempool>/<txid>-<n>/<txid>-<n>/.../<txid>-<n>.<bin|hex|json>`
@@ -77,7 +76,6 @@ $ curl localhost:19998/rest/getutxos/checkmempool/b2cdfd7b89def827ff8af7cd9bff76
    "bitmap": "1",
    "utxos" : [
       {
-         "txvers" : 1
          "height" : 2147483647,
          "value" : 8.8687,		 
          "scriptPubKey" : {
