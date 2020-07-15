@@ -34,6 +34,15 @@ static RPCTimerInterface* timerInterface = nullptr;
 /* Map of name to timer. */
 static std::map<std::string, std::unique_ptr<RPCTimerBase> > deadlineTimers;
 
+static const std::vector<std::pair<std::string /*command*/, std::string /*subcommand*/>> masternodeAllowedCommands = {
+        {"getbestblockhash", ""},
+        {"getblockhash", ""},
+        {"getblockcount", ""},
+        {"getblockchaininfo", ""},
+        {"getnetworkinfo", ""},
+
+};
+
 static struct CRPCSignals
 {
     boost::signals2::signal<void ()> Started;
@@ -545,6 +554,25 @@ UniValue CRPCTable::execute(const JSONRPCRequest &request) const
     const CRPCCommand *pcmd = tableRPC[request.strMethod];
     if (!pcmd)
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found");
+
+    if (fMasternodeMode) {
+        auto it = find_if(masternodeAllowedCommands.begin(), masternodeAllowedCommands.end(), [request](std::pair<std::string /*command*/, std::string /*subcommand*/> cmd) {
+            // Check if this request matches a valid masternode rpc command
+            if (request.strMethod == cmd.first) {
+                // First arg / command matched, if there is no subcommand return true
+                if (cmd.second.empty()) return true;
+                if (request.params[0].isStr() && request.params[0].getValStr() == cmd.second) {
+                    // Sub command was needed and matched, return true
+                    return true;
+                }
+            }
+            return false;
+        });
+        // Don't throw error when running on regtest
+        if (it == masternodeAllowedCommands.end() && !gArgs.GetBoolArg("-regtest", false)) {
+            throw JSONRPCError(RPC_PROTECTED_COMMAND, "Method prohibited on active masternodes");
+        }
+    }
 
     g_rpcSignals.PreCommand(*pcmd);
 
