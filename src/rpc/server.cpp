@@ -555,7 +555,7 @@ UniValue CRPCTable::execute(const JSONRPCRequest &request) const
     if (!pcmd)
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found");
 
-    if (fMasternodeMode) {
+    if (fMasternodeMode && request.authUser == "platform") {
         auto it = find_if(masternodeAllowedCommands.begin(), masternodeAllowedCommands.end(), [request](std::pair<std::string /*command*/, std::string /*subcommand*/> cmd) {
             // Check if this request matches a valid masternode rpc command
             if (request.strMethod == cmd.first) {
