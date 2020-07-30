@@ -31,13 +31,13 @@ static void addCoin(const CAmount& nValue, const CWallet& wallet, std::vector<CO
 // same one over and over isn't too useful. Generating random isn't useful
 // either for measurements."
 // (https://github.com/bitcoin/bitcoin/issues/7883#issuecomment-224807484)
-static void CoinSelection(benchmark::State& state)
+static void CoinSelection(benchmark::Bench& bench)
 {
     const CWallet wallet(WalletLocation(), WalletDatabase::CreateDummy());
     std::vector<COutput> vCoins;
     LOCK(wallet.cs_wallet);
 
-    while (state.KeepRunning()) {
+    bench.run([&] {
         // Add coins.
         for (int i = 0; i < 1000; i++)
             addCoin(1000 * COIN, wallet, vCoins);
@@ -59,7 +59,7 @@ static void CoinSelection(benchmark::State& state)
             delete output.tx;
         }
         vCoins.clear();
-    }
+    });
 }
 
 typedef std::set<CInputCoin> CoinSet;
@@ -85,7 +85,7 @@ static CAmount make_hard_case(int utxos, std::vector<CInputCoin>& utxo_pool)
     return target;
 }
 
-static void BnBExhaustion(benchmark::State& state)
+static void BnBExhaustion(benchmark::Bench& bench)
 {
     // Setup
     std::vector<CInputCoin> utxo_pool;
@@ -93,7 +93,7 @@ static void BnBExhaustion(benchmark::State& state)
     CAmount value_ret = 0;
     CAmount not_input_fees = 0;
 
-    while (state.KeepRunning()) {
+    bench.run([&] {
         // Benchmark
         CAmount target = make_hard_case(17, utxo_pool);
         SelectCoinsBnB(utxo_pool, target, 0, selection, value_ret, not_input_fees); // Should exhaust
@@ -101,8 +101,8 @@ static void BnBExhaustion(benchmark::State& state)
         // Cleanup
         utxo_pool.clear();
         selection.clear();
-    }
+    });
 }
 
-BENCHMARK(CoinSelection, 650);
-BENCHMARK(BnBExhaustion, 650);
+BENCHMARK(CoinSelection);
+BENCHMARK(BnBExhaustion);
