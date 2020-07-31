@@ -487,6 +487,11 @@ void CDKGSession::VerifyConnectionAndMinProtoVersions()
             logger.Batch("%s does not have min proto version %d (has %d)", m->dmn->proTxHash.ToString(), MIN_MASTERNODE_PROTO_VERSION, it->second);
         }
 
+        if (m->dmn->pdmnState->PlatformBan) {
+            m->badConnection = true;
+            logger.Batch("%s has an active Platform Ban", m->dmn->proTxHash.ToString());
+        }
+
         auto lastOutbound = mmetaman.GetMetaInfo(m->dmn->proTxHash)->GetLastOutboundSuccess();
         if (GetAdjustedTime() - lastOutbound > 60 * 60) {
             m->badConnection = true;
