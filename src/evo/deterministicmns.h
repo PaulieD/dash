@@ -29,6 +29,7 @@ class CDeterministicMNState
 {
 private:
     int nPoSeBanHeight{-1};
+    bool PlatformBan{false};
 
     friend class CDeterministicMNStateDiff;
 
@@ -114,6 +115,7 @@ public:
     {
         nPoSePenalty = 0;
         nPoSeBanHeight = -1;
+        PlatformBan = false;
         nPoSeRevivedHeight = nRevivedHeight;
     }
     void UpdateConfirmedHash(const uint256& _proTxHash, const uint256& _confirmedHash)
