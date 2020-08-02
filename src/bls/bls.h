@@ -27,6 +27,8 @@
 #define BLS_CURVE_PUBKEY_SIZE 48
 #define BLS_CURVE_SIG_SIZE 96
 
+#define CHIA_CLS_EXTENDED_SECKEY_SIZE 77
+
 class CBLSSignature;
 class CBLSPublicKey;
 
@@ -34,6 +36,7 @@ template <typename ImplType, size_t _SerSize, typename C>
 class CBLSWrapper
 {
     friend class CBLSSecretKey;
+    friend class CBLSExtendedSecretKey;
     friend class CBLSPublicKey;
     friend class CBLSSignature;
 
@@ -255,9 +258,26 @@ public:
     CBLSPublicKey GetPublicKey() const;
     CBLSSignature Sign(const uint256& hash) const;
 
-    bls::ExtendedPrivateKey GetExtendedSecretKey() const;
-    CBLSSecretKey Derive(int derivation) const;
+    CBLSExtendedSecretKey GetExtendedSecretKey() const;
 
+protected:
+    bool InternalSetBuf(const void* buf);
+    bool InternalGetBuf(void* buf) const;
+};
+
+class CBLSExtendedSecretKey : public CBLSWrapper<bls::ExtendedPrivateKey, CHIA_CLS_EXTENDED_SECKEY_SIZE/*bls::ExtendedPrivateKey::EXTENDED_PRIVATE_KEY_SIZE*/, CBLSExtendedSecretKey>
+{
+public:
+    using CBLSWrapper::operator=;
+    using CBLSWrapper::operator==;
+    using CBLSWrapper::operator!=;
+
+    CBLSExtendedSecretKey() {}
+
+    CBLSPublicKey GetPublicKey() const;
+    CBLSSecretKey GetSecretKey() const;
+
+    CBLSSecretKey Derive(uint32_t derivation) const;
 
 protected:
     bool InternalSetBuf(const void* buf);
@@ -268,6 +288,7 @@ class CBLSPublicKey : public CBLSWrapper<bls::PublicKey, BLS_CURVE_PUBKEY_SIZE, 
 {
     friend class CBLSSecretKey;
     friend class CBLSSignature;
+    friend class CBLSExtendedSecretKey;
 
 public:
     using CBLSWrapper::operator=;

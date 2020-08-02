@@ -181,7 +181,7 @@ CBLSSecretKey CBLSSecretKey::Derive(int derivation) const
     return newKey;
 }
 
-bls::ExtendedPrivateKey CBLSSecretKey::GetExtendedSecretKey() const
+CBLSExtendedSecretKey CBLSSecretKey::GetExtendedSecretKey() const
 {
     // version(4) depth(1) parent fingerprint(4) child#(4) cc(32) sk(32)
     uint8_t version[4];
@@ -507,5 +507,41 @@ bool BLSInit()
 #ifndef BUILD_BITCOIN_INTERNAL
     bls::BLS::SetSecureAllocator(secure_allocate, secure_free);
 #endif
-    return true;
+    return true;CBLSPublicKey()
+}
+
+CBLSPublicKey CBLSExtendedSecretKey::GetPublicKey() const {
+    if (!IsValid()) {
+        return CBLSPublicKey();
+    }
+
+    CBLSPublicKey pubKey;
+    pubKey.impl = impl.GetPublicKey();
+    pubKey.fValid = true;
+    pubKey.UpdateHash();
+    return pubKey;
+}
+
+CBLSSecretKey CBLSExtendedSecretKey::GetSecretKey() const {
+    if (!IsValid()) {
+        return CBLSSecretKey();
+    }
+
+    CBLSSecretKey secretKey;
+    secretKey.impl = impl.GetPrivateKey();
+    secretKey.fValid = true;
+    secretKey.UpdateHash();
+    return secretKey;
+}
+
+CBLSSecretKey CBLSExtendedSecretKey::Derive(uint32_t derivation) const {
+    if (!IsValid()) {
+        return CBLSSecretKey();
+    }
+
+    CBLSSecretKey secretKey;
+    secretKey.impl = impl.PrivateChild(derivation);
+    secretKey.fValid = true;
+    secretKey.UpdateHash();
+    return secretKey;
 }
