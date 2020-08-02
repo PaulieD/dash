@@ -255,6 +255,10 @@ public:
     CBLSPublicKey GetPublicKey() const;
     CBLSSignature Sign(const uint256& hash) const;
 
+    bls::ExtendedPrivateKey GetExtendedSecretKey() const;
+    CBLSSecretKey Derive(int derivation) const;
+
+
 protected:
     bool InternalSetBuf(const void* buf);
     bool InternalGetBuf(void* buf) const;

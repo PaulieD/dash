@@ -46,6 +46,39 @@ BOOST_AUTO_TEST_CASE(bls_sig_tests)
     BOOST_CHECK(sig2.VerifyInsecure(sk2.GetPublicKey(), msgHash1));
 }
 
+BOOST_AUTO_TEST_CASE(bls_derive_tests)
+{
+    CBLSSecretKey sk1, sk2, sk3;
+
+    sk1.MakeNewKey();
+
+/*
+    auto epub = sk1.GetExtendedSecretKey();
+    CBLSSecretKey s;
+    s.SetBuf()
+    s.impl = epub.GetPrivateKey();
+*/
+
+/*
+    BOOST_CHECK(sk1.ToString() == s.ToString());
+*/
+
+    sk2 = sk1.Derive(1);
+    sk3 = sk2.Derive(1);
+
+    BOOST_CHECK(sk1.Derive(1).Derive(1) == sk3);
+    BOOST_CHECK(sk1.Derive(2) == sk3);
+    BOOST_CHECK(sk1.Derive(3) == sk3);
+
+    std::cout << "sk1 " << sk1.ToString() << std::endl;
+    std::cout << "sk2 " << sk2.ToString() << std::endl;
+
+/*
+    BOOST_CHECK(sk1.Derive(2). == sk3);
+    BOOST_CHECK(sk1.Derive(3) == sk3);
+*/
+}
+
 struct Message
 {
     uint32_t sourceId;

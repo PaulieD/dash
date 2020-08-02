@@ -171,6 +171,46 @@ CBLSSignature CBLSSecretKey::Sign(const uint256& hash) const
     return sigRet;
 }
 
+CBLSSecretKey CBLSSecretKey::Derive(int derivation) const
+{
+
+    auto eprivkey = GetExtendedSecretKey();
+
+    CBLSSecretKey newKey;
+    newKey.impl = eprivkey.PrivateChild(derivation).GetPrivateKey();
+    return newKey;
+}
+
+bls::ExtendedPrivateKey CBLSSecretKey::GetExtendedSecretKey() const
+{
+    // version(4) depth(1) parent fingerprint(4) child#(4) cc(32) sk(32)
+    uint8_t version[4];
+    uint8_t depth[1];
+    uint8_t parentfingerprint[4];
+    uint8_t childnum[4];
+    uint8_t cc[32];
+    uint8_t sk[32];
+
+    memset(version, 0, 4);
+    memset(depth, 0, 1);
+    memset(parentfingerprint, 0, 4);
+    memset(childnum, 0, 4);
+    memset(cc, 0, 32);
+
+    uint8_t src[32];
+    InternalGetBuf(src);
+    memcpy(sk, src, 32);
+
+    uint8_t epubkeyser[77];
+    memset(epubkeyser, 0, 77);
+    memcpy(epubkeyser + 77 - 32, sk, 32);
+
+    bls::ExtendedPrivateKey eprivkey = bls::ExtendedPrivateKey::FromBytes(epubkeyser);
+    assert(eprivkey.GetPrivateKey() == impl);
+    return bls::ExtendedPrivateKey::FromBytes(epubkeyser);
+}
+
+
 bool CBLSPublicKey::InternalSetBuf(const void* buf)
 {
     try {
