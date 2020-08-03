@@ -31,6 +31,7 @@
 
 class CBLSSignature;
 class CBLSPublicKey;
+class CBLSExtendedSecretKey;
 
 template <typename ImplType, size_t _SerSize, typename C>
 class CBLSWrapper
@@ -38,6 +39,7 @@ class CBLSWrapper
     friend class CBLSSecretKey;
     friend class CBLSExtendedSecretKey;
     friend class CBLSPublicKey;
+    friend class CBLSExtendedPublicKey;
     friend class CBLSSignature;
 
 protected:
@@ -277,7 +279,7 @@ public:
     CBLSPublicKey GetPublicKey() const;
     CBLSSecretKey GetSecretKey() const;
 
-    CBLSSecretKey Derive(uint32_t derivation) const;
+    CBLSExtendedSecretKey Derive(uint32_t derivation) const;
 
 protected:
     bool InternalSetBuf(const void* buf);

@@ -48,35 +48,23 @@ BOOST_AUTO_TEST_CASE(bls_sig_tests)
 
 BOOST_AUTO_TEST_CASE(bls_derive_tests)
 {
-    CBLSSecretKey sk1, sk2, sk3;
+    CBLSSecretKey sk1;
 
     sk1.MakeNewKey();
 
-/*
-    auto epub = sk1.GetExtendedSecretKey();
-    CBLSSecretKey s;
-    s.SetBuf()
-    s.impl = epub.GetPrivateKey();
-*/
+    CBLSExtendedSecretKey esk1;
 
-/*
-    BOOST_CHECK(sk1.ToString() == s.ToString());
-*/
+    esk1 = sk1.GetExtendedSecretKey();
 
-    sk2 = sk1.Derive(1);
-    sk3 = sk2.Derive(1);
+    uint256 msgHash1 = uint256S("0000000000000000000000000000000000000000000000000000000000000001");
+    uint256 msgHash2 = uint256S("0000000000000000000000000000000000000000000000000000000000000002");
 
-    BOOST_CHECK(sk1.Derive(1).Derive(1) == sk3);
-    BOOST_CHECK(sk1.Derive(2) == sk3);
-    BOOST_CHECK(sk1.Derive(3) == sk3);
+    auto sig1 = sk1.Sign(msgHash1);
+    auto sig2 = esk1.GetSecretKey().Sign(msgHash1);
 
-    std::cout << "sk1 " << sk1.ToString() << std::endl;
-    std::cout << "sk2 " << sk2.ToString() << std::endl;
-
-/*
-    BOOST_CHECK(sk1.Derive(2). == sk3);
-    BOOST_CHECK(sk1.Derive(3) == sk3);
-*/
+    BOOST_CHECK(sig1 == sig2);
+    BOOST_CHECK(sig1.VerifyInsecure(sk1.GetPublicKey(), msgHash1));
+    BOOST_CHECK(sig1.VerifyInsecure(esk1.GetPublicKey(), msgHash1));
 }
 
 struct Message

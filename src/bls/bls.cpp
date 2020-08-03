@@ -171,43 +171,30 @@ CBLSSignature CBLSSecretKey::Sign(const uint256& hash) const
     return sigRet;
 }
 
-CBLSSecretKey CBLSSecretKey::Derive(int derivation) const
+CBLSExtendedSecretKey CBLSExtendedSecretKey::Derive(uint32_t derivation) const
 {
 
-    auto eprivkey = GetExtendedSecretKey();
-
-    CBLSSecretKey newKey;
-    newKey.impl = eprivkey.PrivateChild(derivation).GetPrivateKey();
-    return newKey;
+    CBLSExtendedSecretKey child;
+    child.impl = impl.PrivateChild(derivation);
+    return child;
 }
 
+// Returns an extended secret key with all data zeroed besides sk
 CBLSExtendedSecretKey CBLSSecretKey::GetExtendedSecretKey() const
 {
     // version(4) depth(1) parent fingerprint(4) child#(4) cc(32) sk(32)
-    uint8_t version[4];
-    uint8_t depth[1];
-    uint8_t parentfingerprint[4];
-    uint8_t childnum[4];
-    uint8_t cc[32];
     uint8_t sk[32];
-
-    memset(version, 0, 4);
-    memset(depth, 0, 1);
-    memset(parentfingerprint, 0, 4);
-    memset(childnum, 0, 4);
-    memset(cc, 0, 32);
-
-    uint8_t src[32];
-    InternalGetBuf(src);
-    memcpy(sk, src, 32);
+    InternalGetBuf(sk);
 
     uint8_t epubkeyser[77];
     memset(epubkeyser, 0, 77);
     memcpy(epubkeyser + 77 - 32, sk, 32);
 
-    bls::ExtendedPrivateKey eprivkey = bls::ExtendedPrivateKey::FromBytes(epubkeyser);
-    assert(eprivkey.GetPrivateKey() == impl);
-    return bls::ExtendedPrivateKey::FromBytes(epubkeyser);
+    CBLSExtendedSecretKey extendedSecretKey;
+
+    extendedSecretKey.impl = bls::ExtendedPrivateKey::FromBytes(epubkeyser);
+
+    return extendedSecretKey;
 }
 
 
@@ -507,7 +494,7 @@ bool BLSInit()
 #ifndef BUILD_BITCOIN_INTERNAL
     bls::BLS::SetSecureAllocator(secure_allocate, secure_free);
 #endif
-    return true;CBLSPublicKey()
+    return true;
 }
 
 CBLSPublicKey CBLSExtendedSecretKey::GetPublicKey() const {
@@ -529,18 +516,6 @@ CBLSSecretKey CBLSExtendedSecretKey::GetSecretKey() const {
 
     CBLSSecretKey secretKey;
     secretKey.impl = impl.GetPrivateKey();
-    secretKey.fValid = true;
-    secretKey.UpdateHash();
-    return secretKey;
-}
-
-CBLSSecretKey CBLSExtendedSecretKey::Derive(uint32_t derivation) const {
-    if (!IsValid()) {
-        return CBLSSecretKey();
-    }
-
-    CBLSSecretKey secretKey;
-    secretKey.impl = impl.PrivateChild(derivation);
     secretKey.fValid = true;
     secretKey.UpdateHash();
     return secretKey;
