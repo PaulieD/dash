@@ -87,10 +87,6 @@ uint256 CSimplifiedMNList::CalcMerkleRoot(bool* pmutated) const
     return ComputeMerkleRoot(leaves, pmutated);
 }
 
-CSimplifiedMNListDiff::CSimplifiedMNListDiff() = default;
-
-CSimplifiedMNListDiff::~CSimplifiedMNListDiff() = default;
-
 bool CSimplifiedMNListDiff::BuildQuorumsDiff(const CBlockIndex* baseBlockIndex, const CBlockIndex* blockIndex)
 {
     auto baseQuorums = llmq::quorumBlockProcessor->GetMinedAndActiveCommitmentsUntilBlock(baseBlockIndex);
