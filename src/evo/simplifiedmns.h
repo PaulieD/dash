@@ -137,16 +137,13 @@ public:
     }
 
 public:
-    CSimplifiedMNListDiff();
-    ~CSimplifiedMNListDiff();
+    CSimplifiedMNListDiff() = default;
+    ~CSimplifiedMNListDiff() = default;
 
     bool BuildQuorumsDiff(const CBlockIndex* baseBlockIndex, const CBlockIndex* blockIndex);
 
     void ToJson(UniValue& obj) const;
 };
-
-CSimplifiedMNListDiff::CSimplifiedMNListDiff() = default;
-CSimplifiedMNListDiff::~CSimplifiedMNListDiff() = default;
 
 bool BuildSimplifiedMNListDiff(const uint256& baseBlockHash, const uint256& blockHash, CSimplifiedMNListDiff& mnListDiffRet, std::string& errorRet);
 
