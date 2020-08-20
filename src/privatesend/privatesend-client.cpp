@@ -1874,15 +1874,25 @@ void CPrivateSendClientOptions::SetMultiSessionEnabled(bool fEnabled)
     options.fPrivateSendMultiSession = fEnabled;
 }
 
-void CPrivateSendClientOptions::SetRounds(int nRounds)
+/**
+ * Sets the number of rounds to mix
+ * @param nRounds Must be greater than zero
+ */
+void CPrivateSendClientOptions::SetRounds(const int nRounds)
 {
+    assert(nRounds > 0);
     CPrivateSendClientOptions& options = CPrivateSendClientOptions::Get();
     LOCK(options.cs_ps_options);
     options.nPrivateSendRounds = nRounds;
 }
 
-void CPrivateSendClientOptions::SetAmount(CAmount amount)
+/**
+ * Sets the number of rounds to mix
+ * @param amount Must be greater than or equal to zero
+ */
+void CPrivateSendClientOptions::SetAmount(const CAmount amount)
 {
+    assert(amount >= 0)
     CPrivateSendClientOptions& options = CPrivateSendClientOptions::Get();
     LOCK(options.cs_ps_options);
     options.nPrivateSendAmount = amount;
