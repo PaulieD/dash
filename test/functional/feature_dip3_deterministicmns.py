@@ -351,7 +351,7 @@ class DIP3Test(BitcoinTestFramework):
 
         return dummy_txin
 
-    def mine_block(self, node, vtx=[], miner_address=None, mn_payee=None, mn_amount=None, use_mnmerkleroot_from_tip=False, expected_error=None):
+    def mine_block(self, node, vtx=[], miner_address=None, mn_payee=None, mn_amount=None, mn_amount_extra=None, use_mnmerkleroot_from_tip=False, expected_error=None):
         bt = node.getblocktemplate()
         height = bt['height']
         tip_hash = bt['previousblockhash']
@@ -391,6 +391,8 @@ class DIP3Test(BitcoinTestFramework):
 
         if mn_amount is None:
             mn_amount = get_masternode_payment(height, coinbasevalue)
+        if mn_amount_extra is not None:
+            mn_amount += mn_amount_extra
         miner_amount = coinbasevalue - mn_amount
 
         outputs = {miner_address: str(Decimal(miner_amount) / COIN)}
@@ -448,6 +450,8 @@ class DIP3Test(BitcoinTestFramework):
         mn_payee = self.nodes[0].getnewaddress()
         self.mine_block(node, mn_payee=mn_payee, expected_error='bad-cb-payee')
         self.mine_block(node, mn_amount=1, expected_error='bad-cb-payee')
+        self.mine_block(node, mn_amount_extra=1, expected_error='bad-cb-payee')
+        self.mine_block(node, mn_amount_extra=-1, expected_error='bad-cb-payee')
 
 if __name__ == '__main__':
     DIP3Test().main()
