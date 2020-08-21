@@ -1876,23 +1876,29 @@ void CPrivateSendClientOptions::SetMultiSessionEnabled(bool fEnabled)
 
 /**
  * Sets the number of rounds to mix
- * @param nRounds Must be greater than zero
+ * @param nRounds must be in [MIN_PRIVATESEND_ROUNDS, MAX_PRIVATESEND_ROUNDS]
  */
 void CPrivateSendClientOptions::SetRounds(const int nRounds)
 {
-    assert(nRounds > 0);
+    // This should be caught before here
+    if (nRounds < MIN_PRIVATESEND_ROUNDS || nRounds > MAX_PRIVATESEND_ROUNDS) {
+        throw std::runtime_error(strprintf("invalid privatesend nRounds set: %d", nRounds));
+    }
     CPrivateSendClientOptions& options = CPrivateSendClientOptions::Get();
     LOCK(options.cs_ps_options);
     options.nPrivateSendRounds = nRounds;
 }
 
 /**
- * Sets the number of rounds to mix
- * @param amount Must be greater than or equal to zero
+ * Sets the target amount to mix
+ * @param amount must be in [MIN_PRIVATESEND_AMOUNT, MAX_PRIVATESEND_AMOUNT]
  */
 void CPrivateSendClientOptions::SetAmount(const CAmount amount)
 {
-    assert(amount >= 0)
+    // This should be caught before here
+    if (amount < MIN_PRIVATESEND_AMOUNT || amount > MAX_PRIVATESEND_AMOUNT) {
+        throw std::runtime_error(strprintf("invalid privatesend amount set: %d", amount));
+    }
     CPrivateSendClientOptions& options = CPrivateSendClientOptions::Get();
     LOCK(options.cs_ps_options);
     options.nPrivateSendAmount = amount;
