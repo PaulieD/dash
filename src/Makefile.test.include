@@ -73,6 +73,7 @@ BITCOIN_TESTS =\
   test/pow_tests.cpp \
   test/prevector_tests.cpp \
   test/privatesend_tests.cpp \
+  test/quorum_tests.cpp \
   test/raii_event_tests.cpp \
   test/random_tests.cpp \
   test/ratecheck_tests.cpp \
