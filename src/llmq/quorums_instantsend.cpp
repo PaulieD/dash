@@ -757,13 +757,14 @@ bool CInstantSendManager::ProcessPendingInstantSendLocks()
 
     if (quorumsRotated) {
         // first check against the current active set and don't ban
-        auto badISLocks = ProcessPendingInstantSendLocks(tipHeight, pendingLocks, false);
-        if (!badISLocks.empty()) {
+        auto badOrOldISLocks = ProcessPendingInstantSendLocks(tipHeight, pendingLocks, false);
+        if (!badOrOldISLocks.empty()) {
             LogPrintf("CInstantSendManager::%s -- detected LLMQ active set rotation, redoing verification on old active set\n", __func__);
 
-            // filter out valid IS locks from "pendingLocks"
+            // remove known valid IS locks from "pendingLocks" since they were processed in the first
+            // ProcessPendingInstantSendLocks call
             for (auto it = pendingLocks.begin(); it != pendingLocks.end(); ) {
-                if (!badISLocks.count(it->first)) {
+                if (!badOrOldISLocks.count(it->first)) {
                     it = pendingLocks.erase(it);
                 } else {
                     ++it;
