@@ -1373,6 +1373,10 @@ void CInstantSendManager::AskNodesForLockedTx(const uint256& txid)
 
 bool CInstantSendManager::ProcessPendingRetryLockTxs()
 {
+    if (!IsInstantSendEnabled()) {
+        return false;
+    }
+
     decltype(pendingRetryTxs) retryTxs;
     {
         LOCK(cs);
@@ -1380,10 +1384,6 @@ bool CInstantSendManager::ProcessPendingRetryLockTxs()
     }
 
     if (retryTxs.empty()) {
-        return false;
-    }
-
-    if (!IsInstantSendEnabled()) {
         return false;
     }
 
