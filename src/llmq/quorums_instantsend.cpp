@@ -751,9 +751,9 @@ bool CInstantSendManager::ProcessPendingInstantSendLocks()
     // active set can be different, leading to different selection of the signing quorum. When we detect such rotation
     // of the active set, we must re-check invalid sigs against the previous active set and only ban nodes when this also
     // fails.
-    auto quorums1 = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight);
-    auto quorums2 = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight - 1);
-    bool quorumsRotated = quorums1 != quorums2;
+    auto quorumsCurrent = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight);
+    auto quorumsLast = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight - 1);
+    bool quorumsRotated = quorumsCurrent != quorumsLast;
 
     if (quorumsRotated) {
         // first check against the current active set and don't ban
