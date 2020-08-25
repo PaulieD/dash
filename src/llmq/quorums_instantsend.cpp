@@ -1065,7 +1065,7 @@ void CInstantSendManager::AddNonLockedTx(const CTransactionRef& tx, const CBlock
 {
     AssertLockHeld(cs);
     auto res = nonLockedTxs.emplace(tx->GetHash(), NonLockedTxInfo());
-    auto& info = res.first->second;
+    NonLockedTxInfo& info = res.first->second;
     info.pindexMined = pindexMined;
 
     if (!info.tx) {
