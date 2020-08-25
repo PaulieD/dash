@@ -752,7 +752,10 @@ bool CInstantSendManager::ProcessPendingInstantSendLocks()
     // of the active set, we must re-check invalid sigs against the previous active set and only ban nodes when this also
     // fails.
     auto quorumsCurrent = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight);
-    auto quorumsLast = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight - 1);
+    // We look 5 blocks in the past because it is possible that multiple blocks get mined at basically the same time
+    // during quorum rotation causing nodes to ban eachother. This check only results in more compute when old or
+    // potentially invalid locks are present
+    auto quorumsLast = llmq::CSigningManager::GetActiveQuorumSet(llmqType, tipHeight - 5);
     bool quorumsRotated = quorumsCurrent != quorumsLast;
 
     if (quorumsRotated) {
