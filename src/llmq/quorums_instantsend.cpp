@@ -1073,10 +1073,13 @@ void CInstantSendManager::AddNonLockedTx(const CTransactionRef& tx, const CBlock
     info.pindexMined = pindexMined;
 
     info.tx = tx;
+    // For each input, check to see if that input is the output of another nonLockedTx
+    // If it is, add this input as a child to parent NonLockedTxInfo
     for (const auto& in : tx->vin) {
         nonLockedTxs[in.prevout.hash].children.emplace(tx->GetHash());
     }
 
+    // If this tx isn't a duplicate, then add each outpoint to `nonLockedTxsByOutpoints` to get locked
     if (res.second) {
         for (auto& in : tx->vin) {
             nonLockedTxsByOutpoints.emplace(in.prevout, tx->GetHash());
