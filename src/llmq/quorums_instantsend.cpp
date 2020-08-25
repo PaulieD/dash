@@ -1064,6 +1064,10 @@ void CInstantSendManager::BlockDisconnected(const std::shared_ptr<const CBlock>&
 void CInstantSendManager::AddNonLockedTx(const CTransactionRef& tx, const CBlockIndex* pindexMined)
 {
     AssertLockHeld(cs);
+    // Attempt to add this transaction to `nonLockedTxs`
+    // res.first is a iterator to transaction in the unordered map
+    // res.second is true if we inserted a new tx, and false if we attempted to insert a tx already present in the map
+    // in such a case res.first is still an iterator to that tx.
     auto res = nonLockedTxs.emplace(tx->GetHash(), NonLockedTxInfo());
     NonLockedTxInfo& info = res.first->second;
     info.pindexMined = pindexMined;
