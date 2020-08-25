@@ -671,7 +671,6 @@ void CInstantSendManager::ProcessMessage(CNode* pfrom, const std::string& strCom
 
 void CInstantSendManager::ProcessMessageInstantSendLock(CNode* pfrom, const llmq::CInstantSendLock& islock, CConnman& connman)
 {
-    bool ban = false;
     // Ban the node if islock doesn't pass basic validation
     if (!PreVerifyInstantSendLock(islock)) {
         LOCK(cs_main);
