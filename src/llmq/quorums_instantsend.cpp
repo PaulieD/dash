@@ -713,7 +713,7 @@ bool CInstantSendManager::PreVerifyInstantSendLock(const llmq::CInstantSendLock&
 
 bool CInstantSendManager::ProcessPendingInstantSendLocks()
 {
-    decltype(pendingInstantSendLocks) pend;
+    decltype(pendingInstantSendLocks) pendingLocks;
 
     {
         LOCK(cs);
@@ -721,17 +721,17 @@ bool CInstantSendManager::ProcessPendingInstantSendLocks()
         // verified by CSigningManager in parallel
         const size_t maxCount = 32;
         if (pendingInstantSendLocks.size() <= maxCount) {
-            pend = std::move(pendingInstantSendLocks);
+            pendingLocks = std::move(pendingInstantSendLocks);
         } else {
-            while (pend.size() < maxCount) {
+            while (pendingLocks.size() < maxCount) {
                 auto it = pendingInstantSendLocks.begin();
-                pend.emplace(it->first, std::move(it->second));
+                pendingLocks.emplace(it->first, std::move(it->second));
                 pendingInstantSendLocks.erase(it);
             }
         }
     }
 
-    if (pend.empty()) {
+    if (pendingLocks.empty()) {
         return false;
     }
 
@@ -757,23 +757,23 @@ bool CInstantSendManager::ProcessPendingInstantSendLocks()
 
     if (quorumsRotated) {
         // first check against the current active set and don't ban
-        auto badISLocks = ProcessPendingInstantSendLocks(tipHeight, pend, false);
+        auto badISLocks = ProcessPendingInstantSendLocks(tipHeight, pendingLocks, false);
         if (!badISLocks.empty()) {
             LogPrintf("CInstantSendManager::%s -- detected LLMQ active set rotation, redoing verification on old active set\n", __func__);
 
-            // filter out valid IS locks from "pend"
-            for (auto it = pend.begin(); it != pend.end(); ) {
+            // filter out valid IS locks from "pendingLocks"
+            for (auto it = pendingLocks.begin(); it != pendingLocks.end(); ) {
                 if (!badISLocks.count(it->first)) {
-                    it = pend.erase(it);
+                    it = pendingLocks.erase(it);
                 } else {
                     ++it;
                 }
             }
             // now check against the previous active set and perform banning if this fails
-            ProcessPendingInstantSendLocks(tipHeight - 1, pend, true);
+            ProcessPendingInstantSendLocks(tipHeight - 1, pendingLocks, true);
         }
     } else {
-        ProcessPendingInstantSendLocks(tipHeight, pend, true);
+        ProcessPendingInstantSendLocks(tipHeight, pendingLocks, true);
     }
 
     return true;
