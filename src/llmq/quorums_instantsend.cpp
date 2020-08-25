@@ -407,7 +407,7 @@ bool CInstantSendManager::ProcessTx(const CTransaction& tx, bool allowReSigning,
         g_connman->RelayInvFiltered(inv, tx, LLMQS_PROTO_VERSION);
     }
 
-    if (!CheckCanLock(tx, true, params)) {
+    if (!CheckCanLock(tx, params, true)) {
         LogPrint(BCLog::INSTANTSEND, "CInstantSendManager::%s -- txid=%s: CheckCanLock returned false\n", __func__,
                   tx.GetHash().ToString());
         return false;
@@ -474,7 +474,7 @@ bool CInstantSendManager::ProcessTx(const CTransaction& tx, bool allowReSigning,
     return true;
 }
 
-bool CInstantSendManager::CheckCanLock(const CTransaction& tx, bool printDebug, const Consensus::Params& params)
+bool CInstantSendManager::CheckCanLock(const CTransaction& tx, const Consensus::Params& params, bool printDebug)
 {
     if (tx.vin.empty()) {
         // can't lock TXs without inputs (e.g. quorum commitments)
@@ -482,7 +482,7 @@ bool CInstantSendManager::CheckCanLock(const CTransaction& tx, bool printDebug, 
     }
 
     for (const auto& in : tx.vin) {
-        if (!CheckCanLock(in.prevout, printDebug, tx.GetHash(), params)) {
+        if (!CheckCanLock(in.prevout, tx.GetHash(), params, printDebug)) {
             return false;
         }
     }
@@ -490,7 +490,7 @@ bool CInstantSendManager::CheckCanLock(const CTransaction& tx, bool printDebug, 
     return true;
 }
 
-bool CInstantSendManager::CheckCanLock(const COutPoint& outpoint, bool printDebug, const uint256& txHash, const Consensus::Params& params)
+bool CInstantSendManager::CheckCanLock(const COutPoint& outpoint, const uint256& txHash, const Consensus::Params& params, bool printDebug)
 {
     int nInstantSendConfirmationsRequired = params.nInstantSendConfirmationsRequired;
 
@@ -1418,7 +1418,7 @@ bool CInstantSendManager::ProcessPendingRetryLockTxs()
         // CheckCanLock is already called by ProcessTx, so we should avoid calling it twice. But we also shouldn't spam
         // the logs when retrying TXs that are not ready yet.
         if (LogAcceptCategory(BCLog::INSTANTSEND)) {
-            if (!CheckCanLock(*tx, false, Params().GetConsensus())) {
+            if (!CheckCanLock(*tx, Params().GetConsensus())) {
                 continue;
             }
             LogPrint(BCLog::INSTANTSEND, "CInstantSendManager::%s -- txid=%s: retrying to lock\n", __func__,
