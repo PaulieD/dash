@@ -672,11 +672,10 @@ void CInstantSendManager::ProcessMessage(CNode* pfrom, const std::string& strCom
 void CInstantSendManager::ProcessMessageInstantSendLock(CNode* pfrom, const llmq::CInstantSendLock& islock, CConnman& connman)
 {
     bool ban = false;
-    if (!PreVerifyInstantSendLock(pfrom->GetId(), islock, ban)) {
-        if (ban) {
-            LOCK(cs_main);
-            Misbehaving(pfrom->GetId(), 100);
-        }
+    // Ban the node if islock doesn't pass basic validation
+    if (!PreVerifyInstantSendLock(islock)) {
+        LOCK(cs_main);
+        Misbehaving(pfrom->GetId(), 100);
         return;
     }
 
@@ -696,19 +695,16 @@ void CInstantSendManager::ProcessMessageInstantSendLock(CNode* pfrom, const llmq
     pendingInstantSendLocks.emplace(hash, std::make_pair(pfrom->GetId(), islock));
 }
 
-bool CInstantSendManager::PreVerifyInstantSendLock(NodeId nodeId, const llmq::CInstantSendLock& islock, bool& retBan)
+bool CInstantSendManager::PreVerifyInstantSendLock(const llmq::CInstantSendLock& islock)
 {
-    retBan = false;
 
     if (islock.txid.IsNull() || islock.inputs.empty()) {
-        retBan = true;
         return false;
     }
 
     std::set<COutPoint> dups;
     for (auto& o : islock.inputs) {
         if (!dups.emplace(o).second) {
-            retBan = true;
             return false;
         }
     }

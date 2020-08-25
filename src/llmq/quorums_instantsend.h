@@ -135,7 +135,7 @@ public:
 
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
     void ProcessMessageInstantSendLock(CNode* pfrom, const CInstantSendLock& islock, CConnman& connman);
-    static bool PreVerifyInstantSendLock(NodeId nodeId, const CInstantSendLock& islock, bool& retBan);
+    static bool PreVerifyInstantSendLock(const CInstantSendLock& islock);
     bool ProcessPendingInstantSendLocks();
     std::unordered_set<uint256> ProcessPendingInstantSendLocks(int signHeight, const std::unordered_map<uint256, std::pair<NodeId, CInstantSendLock>, StaticSaltedHasher>& pend, bool ban);
     void ProcessInstantSendLock(NodeId from, const uint256& hash, const CInstantSendLock& islock);
