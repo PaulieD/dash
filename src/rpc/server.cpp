@@ -34,6 +34,9 @@ static RPCTimerInterface* timerInterface = nullptr;
 /* Map of name to timer. */
 static std::map<std::string, std::unique_ptr<RPCTimerBase> > deadlineTimers;
 
+//
+static std::string platformUser = "platform_user";
+
 static const std::vector<std::pair<std::string /*command*/, std::string /*subcommand*/>> masternodeAllowedCommands = {
         {"getbestblockhash", ""},
         {"getblockhash", ""},
@@ -555,7 +558,8 @@ UniValue CRPCTable::execute(const JSONRPCRequest &request) const
     if (!pcmd)
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found");
 
-    if (fMasternodeMode && request.authUser == "platform") {
+    // Before executing the RPC Command, filter commands from platform rpc user
+    if (fMasternodeMode && request.authUser == platformUser) {
         auto it = find_if(masternodeAllowedCommands.begin(), masternodeAllowedCommands.end(), [request](std::pair<std::string /*command*/, std::string /*subcommand*/> cmd) {
             // Check if this request matches a valid masternode rpc command
             if (request.strMethod == cmd.first) {
