@@ -298,6 +298,18 @@ void quorum_sign_help()
     );
 }
 
+void quorum_platform_sign_help()
+{
+    throw std::runtime_error(
+            "quorum platformsign \"id\" \"msgHash\" ( \"quorumHash\" )\n"
+            "Threshold-sign a message, using the platform LLMQ Type.\n"
+            "\nArguments:\n"
+            "1. \"id\"                  (string, required) Request id.\n"
+            "2. \"msgHash\"             (string, required) Message hash.\n"
+            "3. \"quorumHash\"          (string, optional) The quorum identifier.\n"
+    );
+}
+
 void quorum_hasrecsig_help()
 {
     throw std::runtime_error(
@@ -342,6 +354,10 @@ UniValue quorum_sigs_cmd(const JSONRPCRequest& request)
             if ((request.params.size() < 4) || (request.params.size() > 5)) {
                 quorum_sign_help();
             }
+        } else if (cmd == "platformsign") {
+            if ((request.params.size() < 3) || (request.params.size() > 4)) {
+                quorum_platform_sign_help();
+            }
         } else if (cmd == "hasrecsig") {
             quorum_hasrecsig_help();
         } else if (cmd == "getrecsig") {
@@ -354,7 +370,13 @@ UniValue quorum_sigs_cmd(const JSONRPCRequest& request)
         }
     }
 
-    Consensus::LLMQType llmqType = (Consensus::LLMQType)ParseInt32V(request.params[1], "llmqType");
+    Consensus::LLMQType llmqType;
+    if (cmd == "platformsign") {
+        llmqType = Params().GetConsensus().llmqTypePlatform;
+    } else {
+        llmqType = (Consensus::LLMQType)ParseInt32V(request.params[1], "llmqType");
+    }
+
     if (!Params().GetConsensus().llmqs.count(llmqType)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid LLMQ type");
     }
@@ -362,9 +384,10 @@ UniValue quorum_sigs_cmd(const JSONRPCRequest& request)
     uint256 id = ParseHashV(request.params[2], "id");
     uint256 msgHash = ParseHashV(request.params[3], "msgHash");
 
-    if (cmd == "sign") {
-        if (!request.params[4].isNull()) {
-            uint256 quorumHash = ParseHashV(request.params[4], "quorumHash");
+    if (cmd == "sign" || cmd == "platformsign") {
+        if (cmd == "sign" && !request.params[4].isNull() ||
+            cmd == "platformsign" && !request.params[3].isNull()) {
+            uint256 quorumHash = ParseHashV(cmd == "sign" ? request.params[4] : request.params[3], "quorumHash");
             auto quorum = llmq::quorumManager->GetQuorum(llmqType, quorumHash);
             if (!quorum) {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, "quorum not found");
@@ -482,6 +505,7 @@ UniValue quorum_dkgsimerror(const JSONRPCRequest& request)
             "  dkgstatus         - Return the status of the current DKG process\n"
             "  memberof          - Checks which quorums the given masternode is a member of\n"
             "  sign              - Threshold-sign a message\n"
+            "  platformsign      - Threshold-sign a message using the platform LLMQ\n"
             "  hasrecsig         - Test if a valid recovered signature is present\n"
             "  getrecsig         - Get a recovered signature\n"
             "  isconflicting     - Test if a conflict exists\n"
