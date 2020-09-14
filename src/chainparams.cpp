@@ -234,12 +234,12 @@ static Consensus::LLMQParams llmq100_67 = {
         .dkgPhaseBlocks = 2,
         .dkgMiningWindowStart = 10, // dkgPhaseBlocks * 5 = after finalization
         .dkgMiningWindowEnd = 18,
-        .dkgBadVotesThreshold = 40,
+        .dkgBadVotesThreshold = 80,
 
         .signingActiveQuorumCount = 24, // a full day worth of LLMQs
 
         .keepOldConnections = 25,
-        .recoveryMembers = 25,
+        .recoveryMembers = 50,
 };
 
 static Consensus::LLMQParams llmq400_60 = {
