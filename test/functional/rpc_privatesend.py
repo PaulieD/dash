@@ -12,6 +12,7 @@ rpc_privatesend.py
 Tests PrivateSend basic RPC
 '''
 
+
 class PrivateSendTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1

@@ -3,9 +3,9 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from test_framework.mininode import *
 from test_framework.test_framework import DashTestFramework
-from test_framework.util import *
+from test_framework.util import wait_until, connect_nodes
+
 
 '''
 feature_llmq_signing.py
@@ -13,6 +13,7 @@ feature_llmq_signing.py
 Checks LLMQs signing sessions
 
 '''
+
 
 class LLMQSigningTest(DashTestFramework):
     def set_test_params(self):
@@ -33,35 +34,36 @@ class LLMQSigningTest(DashTestFramework):
         self.mine_quorum()
 
         id = "0000000000000000000000000000000000000000000000000000000000000001"
-        msgHash = "0000000000000000000000000000000000000000000000000000000000000002"
-        msgHashConflict = "0000000000000000000000000000000000000000000000000000000000000003"
+        msg_hash = "0000000000000000000000000000000000000000000000000000000000000002"
+        msg_hash_conflict = "0000000000000000000000000000000000000000000000000000000000000003"
 
         def check_sigs(hasrecsigs, isconflicting1, isconflicting2):
             for node in self.nodes:
-                if node.quorum("hasrecsig", 100, id, msgHash) != hasrecsigs:
+                if node.quorum("hasrecsig", 100, id, msg_hash) != hasrecsigs:
                     return False
-                if node.quorum("isconflicting", 100, id, msgHash) != isconflicting1:
+                if node.quorum("isconflicting", 100, id, msg_hash) != isconflicting1:
                     return False
-                if node.quorum("isconflicting", 100, id, msgHashConflict) != isconflicting2:
+                if node.quorum("isconflicting", 100, id, msg_hash_conflict) != isconflicting2:
                     return False
             return True
 
         def wait_for_sigs(hasrecsigs, isconflicting1, isconflicting2, timeout):
-            wait_until(lambda: check_sigs(hasrecsigs, isconflicting1, isconflicting2), timeout = timeout)
+            wait_until(lambda: check_sigs(hasrecsigs, isconflicting1, isconflicting2), timeout=timeout)
 
         def assert_sigs_nochange(hasrecsigs, isconflicting1, isconflicting2, timeout):
-            assert(not wait_until(lambda: not check_sigs(hasrecsigs, isconflicting1, isconflicting2), timeout = timeout, do_assert = False))
+            assert(not wait_until(lambda: not check_sigs(hasrecsigs, isconflicting1, isconflicting2), timeout=timeout,
+                                  do_assert=False))
 
         # Initial state
         wait_for_sigs(False, False, False, 1)
 
         # Sign 2 shares, should not result in recovered sig
         for i in range(2):
-            self.mninfo[i].node.quorum("sign", 100, id, msgHash)
+            self.mninfo[i].node.quorum("sign", 100, id, msg_hash)
         assert_sigs_nochange(False, False, False, 3)
 
-        # Sign one more share, should result in recovered sig and conflict for msgHashConflict
-        self.mninfo[2].node.quorum("sign", 100, id, msgHash)
+        # Sign one more share, should result in recovered sig and conflict for msg_hash_conflict
+        self.mninfo[2].node.quorum("sign", 100, id, msg_hash)
         wait_for_sigs(True, False, True, 15)
 
         recsig_time = self.mocktime
@@ -70,7 +72,8 @@ class LLMQSigningTest(DashTestFramework):
         self.mine_quorum()
         assert_sigs_nochange(True, False, True, 3)
 
-        # Mine 2 more quorums, so that the one used for the the recovered sig should become inactive, nothing should change
+        # Mine 2 more quorums, so that the one used for the the recovered sig should become inactive, nothing should
+        # change
         self.mine_quorum()
         self.mine_quorum()
         assert_sigs_nochange(True, False, True, 3)
@@ -85,9 +88,9 @@ class LLMQSigningTest(DashTestFramework):
         wait_for_sigs(False, False, False, 15)
 
         for i in range(2):
-            self.mninfo[i].node.quorum("sign", 100, id, msgHashConflict)
+            self.mninfo[i].node.quorum("sign", 100, id, msg_hash_conflict)
         for i in range(2, 5):
-            self.mninfo[i].node.quorum("sign", 100, id, msgHash)
+            self.mninfo[i].node.quorum("sign", 100, id, msg_hash)
         wait_for_sigs(True, False, True, 15)
 
         if self.options.spork21:
@@ -99,7 +102,7 @@ class LLMQSigningTest(DashTestFramework):
             mn.node.setnetworkactive(False)
             wait_until(lambda: mn.node.getconnectioncount() == 0)
             for i in range(4):
-                self.mninfo[i].node.quorum("sign", 100, id, msgHash)
+                self.mninfo[i].node.quorum("sign", 100, id, msg_hash)
             assert_sigs_nochange(False, False, False, 3)
             # Need to re-connect so that it later gets the recovered sig
             mn.node.setnetworkactive(True)
@@ -110,6 +113,7 @@ class LLMQSigningTest(DashTestFramework):
             # Let 2 seconds pass so that the next node is used for recovery, which should succeed
             self.bump_mocktime(2)
             wait_for_sigs(True, False, True, 2)
+
 
 if __name__ == '__main__':
     LLMQSigningTest().main()

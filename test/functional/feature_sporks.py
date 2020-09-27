@@ -9,6 +9,7 @@ from test_framework.util import connect_nodes, wait_until
 '''
 '''
 
+
 class SporkTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 3
@@ -58,6 +59,7 @@ class SporkTest(BitcoinTestFramework):
         # connect new node and check spork propagation after restoring from cache
         connect_nodes(self.nodes[1], 2)
         wait_until(lambda: self.get_test_spork_state(self.nodes[2]), sleep=0.1, timeout=10)
+
 
 if __name__ == '__main__':
     SporkTest().main()

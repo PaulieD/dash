@@ -12,6 +12,7 @@ Simulate and check DKG errors
 
 '''
 
+
 class LLMQDKGErrors(DashTestFramework):
     def set_test_params(self):
         self.set_dash_test_params(4, 3, [["-whitelist=127.0.0.1"]] * 4, fast_dip3_enforcement=True)
@@ -74,22 +75,22 @@ class LLMQDKGErrors(DashTestFramework):
         qh = self.mine_quorum(expected_contributions=3, expected_complaints=0, expected_justifications=0, expected_commitments=2)
         self.assert_member_valid(qh, self.mninfo[0].proTxHash, True)
 
-    def assert_member_valid(self, quorumHash, proTxHash, expectedValid):
-        q = self.nodes[0].quorum('info', 100, quorumHash, True)
+    def assert_member_valid(self, quorum_hash, protx_hash, expected_valid):
+        q = self.nodes[0].quorum('info', 100, quorum_hash, True)
         for m in q['members']:
-            if m['proTxHash'] == proTxHash:
-                if expectedValid:
+            if m['proTxHash'] == protx_hash:
+                if expected_valid:
                     assert(m['valid'])
                 else:
                     assert(not m['valid'])
             else:
                 assert(m['valid'])
 
-    def heal_masternodes(self, blockCount):
+    def heal_masternodes(self, block_count):
         # We're not testing PoSe here, so lets heal the MNs :)
         self.nodes[0].spork("SPORK_17_QUORUM_DKG_ENABLED", 4070908800)
         self.wait_for_sporks_same()
-        for i in range(blockCount):
+        for i in range(block_count):
             self.bump_mocktime(1)
             self.nodes[0].generate(1)
         self.sync_all()

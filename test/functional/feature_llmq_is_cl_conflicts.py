@@ -2,13 +2,17 @@
 # Copyright (c) 2015-2020 The Dash Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+import struct
 import time
 from decimal import Decimal
+from codecs import encode
 
 from test_framework.blocktools import get_masternode_payment, create_coinbase, create_block
-from test_framework.mininode import *
 from test_framework.test_framework import DashTestFramework
-from test_framework.util import assert_raises_rpc_error, get_bip9_status
+from test_framework.util import assert_raises_rpc_error, get_bip9_status, hex_str_to_bytes
+from test_framework.mininode import P2PInterface, network_thread_start
+from test_framework.messages import hash256, uint256_from_str, CInv, msg_inv, FromHex, CTransaction, \
+    ToHex, COIN, CCbTx, ser_string, msg_clsig, ser_compact_size, msg_islock
 
 '''
 feature_llmq_is_cl_conflicts.py
@@ -17,6 +21,7 @@ Checks conflict handling between ChainLocks and InstantSend
 
 '''
 
+
 class TestP2PConn(P2PInterface):
     def __init__(self):
         super().__init__()
@@ -24,17 +29,17 @@ class TestP2PConn(P2PInterface):
         self.islocks = {}
 
     def send_clsig(self, clsig):
-        hash = uint256_from_str(hash256(clsig.serialize()))
-        self.clsigs[hash] = clsig
+        cl_hash = uint256_from_str(hash256(clsig.serialize()))
+        self.clsigs[cl_hash] = clsig
 
-        inv = msg_inv([CInv(29, hash)])
+        inv = msg_inv([CInv(29, cl_hash)])
         self.send_message(inv)
 
     def send_islock(self, islock):
-        hash = uint256_from_str(hash256(islock.serialize()))
-        self.islocks[hash] = islock
+        islock_hash = uint256_from_str(hash256(islock.serialize()))
+        self.islocks[islock_hash] = islock
 
-        inv = msg_inv([CInv(30, hash)])
+        inv = msg_inv([CInv(30, islock_hash)])
         self.send_message(inv)
 
     def on_getdata(self, message):
@@ -49,7 +54,6 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
     def set_test_params(self):
         self.set_dash_test_params(4, 3, fast_dip3_enforcement=True)
         self.set_dash_dip8_activation(10)
-        #disable_mocktime()
 
     def run_test(self):
 
@@ -151,8 +155,10 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
 
         # Lets verify that the ISLOCKs got pruned
         for node in self.nodes:
-            assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", node.getrawtransaction, rawtx1_txid, True)
-            assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", node.getrawtransaction, rawtx4_txid, True)
+            assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", node.getrawtransaction,
+                                    rawtx1_txid, True)
+            assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", node.getrawtransaction,
+                                    rawtx4_txid, True)
             rawtx = node.getrawtransaction(rawtx2_txid, True)
             assert(rawtx['chainlock'])
             assert(rawtx['instantlock'])
@@ -210,12 +216,12 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
         assert(self.nodes[0].getbestblockhash() != good_tip)
         assert(self.nodes[1].getbestblockhash() != good_tip)
 
-    def create_block(self, node, vtx=[]):
+    def create_block(self, node, vtx=None):
         bt = node.getblocktemplate()
         height = bt['height']
         tip_hash = bt['previousblockhash']
 
-        coinbasevalue = bt['coinbasevalue']
+        coinbase_value = bt['coinbasevalue']
         miner_address = node.getnewaddress()
         mn_payee = bt['masternode'][0]['payee']
 
@@ -237,15 +243,15 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
             new_fees += in_value - out_value
 
         # fix fees
-        coinbasevalue -= bt_fees
-        coinbasevalue += new_fees
+        coinbase_value -= bt_fees
+        coinbase_value += new_fees
 
         realloc_info = get_bip9_status(self.nodes[0], 'realloc')
         realloc_height = 99999999
         if realloc_info['status'] == 'active':
             realloc_height = realloc_info['since']
-        mn_amount = get_masternode_payment(height, coinbasevalue, realloc_height)
-        miner_amount = coinbasevalue - mn_amount
+        mn_amount = get_masternode_payment(height, coinbase_value, realloc_height)
+        miner_amount = coinbase_value - mn_amount
 
         outputs = {miner_address: str(Decimal(miner_amount) / COIN)}
         if mn_amount > 0:
@@ -258,7 +264,7 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
         if len(bt['coinbase_payload']) != 0:
             cbtx = FromHex(CCbTx(version=1), bt['coinbase_payload'])
             coinbase.nVersion = 3
-            coinbase.nType = 5 # CbTx
+            coinbase.nType = 5  # CbTx
             coinbase.vExtraPayload = cbtx.serialize()
 
         coinbase.calc_sha256()
@@ -276,29 +282,29 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
         block.solve()
         return block
 
-    def create_chainlock(self, height, blockHash):
+    def create_chainlock(self, height, block_hash):
         request_id = "%064x" % uint256_from_str(hash256(ser_string(b"clsig") + struct.pack("<I", height)))
-        message_hash = "%064x" % blockHash
+        message_hash = "%064x" % block_hash
 
         for mn in self.mninfo:
             mn.node.quorum('sign', 100, request_id, message_hash)
 
-        recSig = None
+        recovered_signature = None
 
         t = time.time()
         while time.time() - t < 10:
             try:
-                recSig = self.nodes[0].quorum('getrecsig', 100, request_id, message_hash)
+                recovered_signature = self.nodes[0].quorum('getrecsig', 100, request_id, message_hash)
                 break
             except:
                 time.sleep(0.1)
-        assert(recSig is not None)
+        assert(recovered_signature is not None)
 
-        clsig = msg_clsig(height, blockHash, hex_str_to_bytes(recSig['sig']))
+        clsig = msg_clsig(height, block_hash, hex_str_to_bytes(recovered_signature['sig']))
         return clsig
 
-    def create_islock(self, hextx):
-        tx = FromHex(CTransaction(), hextx)
+    def create_islock(self, hex_tx):
+        tx = FromHex(CTransaction(), hex_tx)
         tx.rehash()
 
         request_id_buf = ser_string(b"islock") + ser_compact_size(len(tx.vin))
@@ -312,18 +318,18 @@ class LLMQ_IS_CL_Conflicts(DashTestFramework):
         for mn in self.mninfo:
             mn.node.quorum('sign', 100, request_id, message_hash)
 
-        recSig = None
+        recovered_signature = None
 
         t = time.time()
         while time.time() - t < 10:
             try:
-                recSig = self.nodes[0].quorum('getrecsig', 100, request_id, message_hash)
+                recovered_signature = self.nodes[0].quorum('getrecsig', 100, request_id, message_hash)
                 break
             except:
                 time.sleep(0.1)
-        assert(recSig is not None)
+        assert(recovered_signature is not None)
 
-        islock = msg_islock(inputs, tx.sha256, hex_str_to_bytes(recSig['sig']))
+        islock = msg_islock(inputs, tx.sha256, hex_str_to_bytes(recovered_signature['sig']))
         return islock
 
 

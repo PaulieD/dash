@@ -3,8 +3,9 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import time
 from test_framework.test_framework import DashTestFramework
-from test_framework.util import *
+from test_framework.util import assert_greater_than_or_equal, wait_until, connect_nodes
 
 '''
 feature_llmq_connections.py
@@ -12,6 +13,7 @@ feature_llmq_connections.py
 Checks intra quorum connections
 
 '''
+
 
 class LLMQConnections(DashTestFramework):
     def set_test_params(self):
@@ -82,7 +84,8 @@ class LLMQConnections(DashTestFramework):
             connect_nodes(self.nodes[i], 0)
             self.nodes[i].ping()
         # wait for ping/pong so that we can be sure that spork propagation works
-        time.sleep(1) # needed to make sure we don't check before the ping is actually sent (fPingQueued might be true but SendMessages still not called)
+        time.sleep(1)  # needed to make sure we don't check before the ping is actually sent (fPingQueued might be
+        # true but SendMessages still not called)
         for i in range(1, len(self.nodes)):
             wait_until(lambda: all('pingwait' not in peer for peer in self.nodes[i].getpeerinfo()))
 
@@ -96,20 +99,20 @@ class LLMQConnections(DashTestFramework):
 
     def get_mn_probe_count(self, node, q, check_peers):
         count = 0
-        mnList = node.protx('list', 'registered', 1)
-        peerList = node.getpeerinfo()
-        mnMap = {}
-        peerMap = {}
-        for mn in mnList:
-            mnMap[mn['proTxHash']] = mn
-        for p in peerList:
+        mn_list = node.protx('list', 'registered', 1)
+        peer_list = node.getpeerinfo()
+        mn_map = {}
+        peer_map = {}
+        for mn in mn_list:
+            mn_map[mn['proTxHash']] = mn
+        for p in peer_list:
             if 'verified_proregtx_hash' in p and p['verified_proregtx_hash'] != '':
-                peerMap[p['verified_proregtx_hash']] = p
+                peer_map[p['verified_proregtx_hash']] = p
         for mn in self.get_quorum_masternodes(q):
-            pi = mnMap[mn.proTxHash]
+            pi = mn_map[mn.proTxHash]
             if pi['metaInfo']['lastOutboundSuccessElapsed'] < 60:
                 count += 1
-            elif check_peers and mn.proTxHash in peerMap:
+            elif check_peers and mn.proTxHash in peer_map:
                 count += 1
         return count
 

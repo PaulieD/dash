@@ -3,16 +3,17 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from test_framework.mininode import *
 from test_framework.test_framework import DashTestFramework
 from test_framework.util import isolate_node, reconnect_isolated_node, assert_equal, \
-    assert_raises_rpc_error
+    assert_raises_rpc_error, bytes_to_hex_str, hex_str_to_bytes
+from test_framework.messages import hash256
 
 '''
 p2p_instantsend.py
 
 Tests InstantSend functionality (prevent doublespend for unconfirmed transactions)
 '''
+
 
 class InstantSendTest(DashTestFramework):
     def set_test_params(self):
@@ -111,7 +112,8 @@ class InstantSendTest(DashTestFramework):
         reconnect_isolated_node(isolated, 0)
         for node in self.nodes:
             if node is not isolated:
-                assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", node.getrawtransaction, dblspnd_txid)
+                assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", node.getrawtransaction,
+                                        dblspnd_txid)
         # instantsend to receiver. The previously isolated node should prune the doublespend TX and request the correct
         # TX from other nodes.
         receiver_addr = receiver.getnewaddress()
@@ -120,7 +122,8 @@ class InstantSendTest(DashTestFramework):
         self.sync_mempools()
         for node in self.nodes:
             self.wait_for_instantlock(is_id, node)
-        assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", isolated.getrawtransaction, dblspnd_txid)
+        assert_raises_rpc_error(-5, "No such mempool or blockchain transaction", isolated.getrawtransaction,
+                                dblspnd_txid)
         # send coins back to the controller node without waiting for confirmations
         receiver.sendtoaddress(self.nodes[0].getnewaddress(), 0.9, "", "", True)
         assert_equal(receiver.getwalletinfo()["balance"], 0)
@@ -128,6 +131,7 @@ class InstantSendTest(DashTestFramework):
         self.bump_mocktime(1)
         self.nodes[0].generate(2)
         self.sync_all()
+
 
 if __name__ == '__main__':
     InstantSendTest().main()

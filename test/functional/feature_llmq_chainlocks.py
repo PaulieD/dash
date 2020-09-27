@@ -5,9 +5,8 @@
 
 import time
 
-from test_framework.mininode import *
 from test_framework.test_framework import DashTestFramework
-from test_framework.util import *
+from test_framework.util import connect_nodes, isolate_node, reconnect_isolated_node
 
 '''
 feature_llmq_chainlocks.py
@@ -16,13 +15,13 @@ Checks LLMQs based ChainLocks
 
 '''
 
+
 class LLMQChainLocksTest(DashTestFramework):
     def set_test_params(self):
         self.set_dash_test_params(4, 3, fast_dip3_enforcement=True)
         self.set_dash_dip8_activation(10)
 
     def run_test(self):
-
         # Connect all nodes to node1 so that we always have the whole network connected
         # Otherwise only masternode connections will be established between nodes, which won't propagate TXs/blocks
         # Usually node0 is the one that does this, but in this test we isolate it multiple times
@@ -133,9 +132,9 @@ class LLMQChainLocksTest(DashTestFramework):
         for txid in txs:
             tx = self.nodes[0].getrawtransaction(txid, 1)
             assert("confirmations" in tx and tx["confirmations"] > 0)
-        # Enable network on first node again, which will cause the blocks to propagate and IS locks to happen retroactively
-        # for the mined TXs, which will then allow the network to create a CLSIG
-        self.log.info("Reenable network on first node and wait for chainlock")
+        # Enable network on first node again, which will cause the blocks to propagate and IS locks to happen
+        # retroactively for the mined TXs, which will then allow the network to create a CLSIG
+        self.log.info("Re-enable network on first node and wait for chainlock")
         reconnect_isolated_node(self.nodes[0], 1)
         self.wait_for_chainlocked_block(self.nodes[0], self.nodes[0].getbestblockhash(), timeout=30)
 
@@ -143,12 +142,12 @@ class LLMQChainLocksTest(DashTestFramework):
         txid = node.sendtoaddress(node.getnewaddress(), amount)
         tx = node.getrawtransaction(txid, 1)
         inputs = []
-        valueIn = 0
+        value_in = 0
         for txout in tx["vout"]:
             inputs.append({"txid": txid, "vout": txout["n"]})
-            valueIn += txout["value"]
+            value_in += txout["value"]
         outputs = {
-            node.getnewaddress(): round(float(valueIn) - 0.0001, 6)
+            node.getnewaddress(): round(float(value_in) - 0.0001, 6)
         }
 
         rawtx = node.createrawtransaction(inputs, outputs)

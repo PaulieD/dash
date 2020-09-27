@@ -2,8 +2,8 @@
 # Copyright (c) 2015-2020 The Dash Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+import time
 
-from test_framework.mininode import *
 from test_framework.test_framework import DashTestFramework
 from test_framework.util import set_node_times, isolate_node, reconnect_isolated_node
 
@@ -17,10 +17,12 @@ Mempool inconsistencies are simulated via disconnecting/reconnecting node 3
 and by having a higher relay fee on nodes 4 and 5.
 '''
 
+
 class LLMQ_IS_RetroactiveSigning(DashTestFramework):
     def set_test_params(self):
         # -whitelist is needed to avoid the trickling logic on node0
-        self.set_dash_test_params(6, 5, [["-whitelist=127.0.0.1"], [], [], [], ["-minrelaytxfee=0.001"], ["-minrelaytxfee=0.001"]], fast_dip3_enforcement=True)
+        self.set_dash_test_params(6, 5, [["-whitelist=127.0.0.1"], [], [], [], ["-minrelaytxfee=0.001"],
+                                         ["-minrelaytxfee=0.001"]], fast_dip3_enforcement=True)
         self.set_dash_llmq_test_params(5, 3)
         self.set_dash_dip8_activation(10)
 
@@ -130,7 +132,7 @@ class LLMQ_IS_RetroactiveSigning(DashTestFramework):
         time.sleep(5)
         # Make the signing session for the IS lock timeout on nodes 1-3
         self.bump_mocktime(61)
-        time.sleep(2) # make sure Cleanup() is called
+        time.sleep(2)  # make sure Cleanup() is called
         reconnect_isolated_node(self.nodes[3], 0)
         # Make sure nodes actually try re-connecting quorum connections
         self.bump_mocktime(30)
@@ -152,10 +154,10 @@ class LLMQ_IS_RetroactiveSigning(DashTestFramework):
         rawtx = self.nodes[0].fundrawtransaction(rawtx)['hex']
         rawtx = self.nodes[0].signrawtransaction(rawtx)['hex']
         txid = self.nodes[3].sendrawtransaction(rawtx)
-        time.sleep(2) # make sure signing is done on node 2 (it's async)
+        time.sleep(2)  # make sure signing is done on node 2 (it's async)
         # Make the signing session for the IS lock timeout on node 3
         self.bump_mocktime(61)
-        time.sleep(2) # make sure Cleanup() is called
+        time.sleep(2)  # make sure Cleanup() is called
         reconnect_isolated_node(self.nodes[3], 0)
         # Make sure nodes actually try re-connecting quorum connections
         self.bump_mocktime(30)
@@ -175,6 +177,7 @@ class LLMQ_IS_RetroactiveSigning(DashTestFramework):
         self.bump_mocktime(10 * 60 + 1)
         block = self.nodes[0].generate(1)[0]
         self.wait_for_chainlocked_block_all_nodes(block)
+
 
 if __name__ == '__main__':
     LLMQ_IS_RetroactiveSigning().main()
