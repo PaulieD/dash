@@ -65,7 +65,6 @@ BOOST_AUTO_TEST_CASE(outbound_slow_chain_eviction)
     dummyNode1.SetSendVersion(PROTOCOL_VERSION);
 
     peerLogic->InitializeNode(&dummyNode1);
-    dummyNode1.nVersion = 1;
     dummyNode1.fSuccessfullyConnected = true;
 
     // This test requires that we have a chain with non-zero work.
@@ -119,7 +118,6 @@ static void AddRandomOutboundPeer(std::vector<CNode *> &vNodes, PeerLogicValidat
     node.SetSendVersion(PROTOCOL_VERSION);
 
     peerLogic.InitializeNode(&node);
-    node.nVersion = 1;
     node.fSuccessfullyConnected = true;
 
     CConnmanTest::AddNode(node);
@@ -202,7 +200,6 @@ BOOST_AUTO_TEST_CASE(DoS_banning)
     CNode dummyNode1(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr1, 0, 0, CAddress(), "", true);
     dummyNode1.SetSendVersion(PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode1);
-    dummyNode1.nVersion = 1;
     dummyNode1.fSuccessfullyConnected = true;
     {
         LOCK(cs_main);
@@ -219,7 +216,6 @@ BOOST_AUTO_TEST_CASE(DoS_banning)
     CNode dummyNode2(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr2, 1, 1, CAddress(), "", true);
     dummyNode2.SetSendVersion(PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode2);
-    dummyNode2.nVersion = 1;
     dummyNode2.fSuccessfullyConnected = true;
     {
         LOCK(cs_main);
@@ -301,7 +297,6 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
     CNode dummyNode(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr, 4, 4, CAddress(), "", true);
     dummyNode.SetSendVersion(PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode);
-    dummyNode.nVersion = 1;
     dummyNode.fSuccessfullyConnected = true;
 
     {
