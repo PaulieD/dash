@@ -240,13 +240,14 @@ public:
     unsigned int nWatchKeys;
     unsigned int nHDPubKeys;
     unsigned int nKeyMeta;
+    unsigned int m_unknown_records;
     bool fIsEncrypted;
     bool fAnyUnordered;
     int nFileVersion;
     std::vector<uint256> vWalletUpgrade;
 
     CWalletScanState() {
-        nKeys = nCKeys = nWatchKeys = nHDPubKeys = nKeyMeta = 0;
+        nKeys = nCKeys = nWatchKeys = nHDPubKeys = nKeyMeta = m_unknown_records = 0;
         fIsEncrypted = false;
         fAnyUnordered = false;
         nFileVersion = 0;
@@ -516,6 +517,8 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
                 strErr = "Error reading wallet database: SetHDChain failed";
                 return false;
             }
+        } else if (strType != "bestblock" && strType != "bestblock_nomerkle"){
+            wss.m_unknown_records++;
         }
         else if (strType == "chdchain")
         {
@@ -642,9 +645,9 @@ DBErrors WalletBatch::LoadWallet(CWallet* pwallet)
 
     LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
-    LogPrintf("Keys: %u plaintext, %u encrypted, %u total; Watch scripts: %u; HD PubKeys: %u; Metadata: %u\n",
+    LogPrintf("Keys: %u plaintext, %u encrypted, %u total; Watch scripts: %u; HD PubKeys: %u; Metadata: %u; Unknown wallet records: %u\n",
            wss.nKeys, wss.nCKeys, wss.nKeys + wss.nCKeys,
-           wss.nWatchKeys, wss.nHDPubKeys, wss.nKeyMeta);
+           wss.nWatchKeys, wss.nHDPubKeys, wss.nKeyMeta, wss.m_unknown_records);
 
     // nTimeFirstKey is only reliable if all keys have metadata
     if ((wss.nKeys + wss.nCKeys + wss.nWatchKeys + wss.nHDPubKeys) != wss.nKeyMeta)
