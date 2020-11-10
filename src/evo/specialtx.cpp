@@ -38,6 +38,9 @@ bool CheckSpecialTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CVali
             return CheckCbTx(tx, pindexPrev, state);
         case TRANSACTION_QUORUM_COMMITMENT:
             return llmq::CheckLLMQCommitment(tx, pindexPrev, state);
+        case TRANSACTION_ASSET_LOCK:
+            // TODO check asset lock
+            return CheckAssetLockTx(tx, pindexPrev, state);
         }
     } catch (const std::exception& e) {
         LogPrintf("%s -- failed: %s\n", __func__, e.what());
@@ -57,6 +60,7 @@ bool ProcessSpecialTx(const CTransaction& tx, const CBlockIndex* pindex, CValida
     case TRANSACTION_PROVIDER_REGISTER:
     case TRANSACTION_PROVIDER_UPDATE_SERVICE:
     case TRANSACTION_PROVIDER_UPDATE_REGISTRAR:
+    case TRANSACTION_ASSET_LOCK: // TODO asset lock
     case TRANSACTION_PROVIDER_UPDATE_REVOKE:
         return true; // handled in batches per block
     case TRANSACTION_COINBASE:
@@ -78,6 +82,7 @@ bool UndoSpecialTx(const CTransaction& tx, const CBlockIndex* pindex)
     case TRANSACTION_PROVIDER_REGISTER:
     case TRANSACTION_PROVIDER_UPDATE_SERVICE:
     case TRANSACTION_PROVIDER_UPDATE_REGISTRAR:
+    case TRANSACTION_ASSET_LOCK: // TODO
     case TRANSACTION_PROVIDER_UPDATE_REVOKE:
         return true; // handled in batches per block
     case TRANSACTION_COINBASE:
