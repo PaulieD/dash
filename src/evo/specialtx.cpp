@@ -11,6 +11,7 @@
 #include <evo/cbtx.h>
 #include <evo/deterministicmns.h>
 #include <evo/specialtx.h>
+#include <evo/assetlocktx.h>
 
 #include <llmq/quorums_commitment.h>
 #include <llmq/quorums_blockprocessor.h>
@@ -39,7 +40,6 @@ bool CheckSpecialTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CVali
         case TRANSACTION_QUORUM_COMMITMENT:
             return llmq::CheckLLMQCommitment(tx, pindexPrev, state);
         case TRANSACTION_ASSET_LOCK:
-            // TODO check asset lock
             return CheckAssetLockTx(tx, pindexPrev, state);
         }
     } catch (const std::exception& e) {

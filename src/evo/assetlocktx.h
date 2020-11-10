@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 The Dash Core developers
+// Copyright (c) 2020 The Dash Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,7 +9,8 @@
 #include <primitives/transaction.h>
 #include <univalue.h>
 
-// coinbase transaction
+class CBlockIndex;
+
 class CAssetLockTx
 {
 public:
@@ -17,8 +18,6 @@ public:
 
 public:
     uint16_t nVersion{CURRENT_VERSION};
-    // TODO I don't know if I need this
-    uint256 inputsHash; // replay protection
 
 public:
     ADD_SERIALIZE_METHODS;
@@ -27,7 +26,6 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(nVersion);
-        READWRITE(inputsHash);
     }
 
     std::string ToString() const;
@@ -37,7 +35,6 @@ public:
         obj.clear();
         obj.setObject();
         obj.pushKV("version", (int)nVersion);
-        obj.pushKV("inputsHash", inputsHash.ToString());
     }
 };
 
