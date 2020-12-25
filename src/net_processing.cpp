@@ -4472,7 +4472,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         }
 
         //
-        // Message: getdata (non-blocks)
+        // Message: getdata (transactions)
         //
 
         // For robustness, expire old requests after a long timeout, so that
