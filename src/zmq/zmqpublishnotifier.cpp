@@ -53,7 +53,11 @@ static int zmq_send_multipart(void *sock, const void* data, size_t size, ...)
 
         data = va_arg(args, const void*);
 
-        rc = zmq_msg_send(&msg, sock, data ? ZMQ_SNDMORE : 0);
+        try {
+            rc = zmq_msg_send(&msg, sock, data ? ZMQ_SNDMORE : 0);
+        } catch (...) {
+            LogPrint(BCLog::ZMQ, "zmq: Caught exception thrown in zmq library. It is possible this caused a zmq message to dropped");
+        }
         if (rc == -1)
         {
             zmqError("Unable to send ZMQ msg");
