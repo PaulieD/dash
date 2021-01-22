@@ -26,7 +26,6 @@ from .util import (
     rpc_url,
     wait_until,
     p2p_port,
-    get_chain_folder,
 )
 
 # For Python 3.4 compatibility
@@ -53,10 +52,9 @@ class TestNode():
     To make things easier for the test writer, any unrecognised messages will
     be dispatched to the RPC connection."""
 
-    def __init__(self, i, datadir, extra_args_from_options, chain, rpchost, timewait, bitcoind, bitcoin_cli, stderr, mocktime, coverage_dir, extra_conf=None, extra_args=None, use_cli=False):
+    def __init__(self, i, datadir, extra_args_from_options, rpchost, timewait, bitcoind, bitcoin_cli, stderr, mocktime, coverage_dir, extra_conf=None, extra_args=None, use_cli=False):
         self.index = i
         self.datadir = datadir
-        self.chain = chain
         self.rpchost = rpchost
         if timewait:
             self.rpc_timeout = timewait
@@ -130,7 +128,7 @@ class TestNode():
         # Delete any existing cookie file -- if such a file exists (eg due to
         # unclean shutdown), it will get overwritten anyway by dashd, and
         # potentially interfere with our attempt to authenticate
-        delete_cookie_file(self.datadir, self.chain)
+        delete_cookie_file(self.datadir)
         self.process = subprocess.Popen(all_args, stderr=stderr, *args, **kwargs)
         self.running = True
         self.log.debug("dashd started, waiting for RPC to come up")
@@ -144,7 +142,7 @@ class TestNode():
                 raise FailedToStartError(self._node_msg(
                     'dashd exited with status {} during initialization'.format(self.process.returncode)))
             try:
-                self.rpc = get_rpc_proxy(rpc_url(self.datadir, self.index, self.chain, self.rpchost), self.index, timeout=self.rpc_timeout, coveragedir=self.coverage_dir)
+                self.rpc = get_rpc_proxy(rpc_url(self.datadir, self.index, self.rpchost), self.index, timeout=self.rpc_timeout, coveragedir=self.coverage_dir)
                 self.rpc.getblockcount()
                 # If the call to getblockcount() succeeds then the RPC connection is up
                 self.rpc_connected = True
@@ -210,8 +208,7 @@ class TestNode():
 
     @contextlib.contextmanager
     def assert_debug_log(self, expected_msgs):
-        chain = get_chain_folder(self.datadir, self.chain)
-        debug_log = os.path.join(self.datadir, chain, 'debug.log')
+        debug_log = os.path.join(self.datadir, 'regtest', 'debug.log')
         with open(debug_log, encoding='utf-8') as dl:
             dl.seek(0, 2)
             prev_size = dl.tell()
@@ -281,7 +278,7 @@ class TestNode():
         if 'dstaddr' not in kwargs:
             kwargs['dstaddr'] = '127.0.0.1'
 
-        p2p_conn.peer_connect(*args, **kwargs, net=self.chain)
+        p2p_conn.peer_connect(*args, **kwargs)
         self.p2ps.append(p2p_conn)
 
         return p2p_conn

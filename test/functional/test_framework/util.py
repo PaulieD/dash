@@ -292,8 +292,8 @@ def p2p_port(n):
 def rpc_port(n):
     return PORT_MIN + PORT_RANGE + n + (MAX_NODES * PortSeed.n) % (PORT_RANGE - 1 - MAX_NODES)
 
-def rpc_url(datadir, i, chain, rpchost=None):
-    rpc_u, rpc_p = get_auth_cookie(datadir, chain)
+def rpc_url(datadir, i, rpchost=None):
+    rpc_u, rpc_p = get_auth_cookie(datadir)
     host = '127.0.0.1'
     port = rpc_port(i)
     if rpchost:
@@ -307,26 +307,13 @@ def rpc_url(datadir, i, chain, rpchost=None):
 # Node functions
 ################
 
-def initialize_datadir(dirname, n, chain):
+def initialize_datadir(dirname, n):
     datadir = get_datadir_path(dirname, n)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
-    # Translate chain name to config name
-    if chain == 'testnet3':
-        chain_name_conf_arg = 'testnet'
-        chain_name_conf_section = 'test'
-        chain_name_conf_arg_value = '1'
-    elif chain == 'devnet':
-        chain_name_conf_arg = 'devnet'
-        chain_name_conf_section = 'devnet'
-        chain_name_conf_arg_value = 'devnet1'
-    else:
-        chain_name_conf_arg = chain
-        chain_name_conf_section = chain
-        chain_name_conf_arg_value = '1'
     with open(os.path.join(datadir, "dash.conf"), 'w', encoding='utf8') as f:
-        f.write("{}={}]\n".format(chain_name_conf_arg, chain_name_conf_arg_value))
-        f.write("[{}]\n".format(chain_name_conf_section))
+        f.write("regtest=1\n")
+        f.write("[regtest]\n")
         f.write("port=" + str(p2p_port(n)) + "\n")
         f.write("rpcport=" + str(rpc_port(n)) + "\n")
         f.write("server=1\n")
@@ -343,7 +330,7 @@ def append_config(datadir, options):
         for option in options:
             f.write(option + "\n")
 
-def get_auth_cookie(datadir, chain):
+def get_auth_cookie(datadir):
     user = None
     password = None
     if os.path.isfile(os.path.join(datadir, "dash.conf")):
@@ -355,9 +342,8 @@ def get_auth_cookie(datadir, chain):
                 if line.startswith("rpcpassword="):
                     assert password is None  # Ensure that there is only one rpcpassword line
                     password = line.split("=")[1].strip("\n")
-    chain = get_chain_folder(datadir, chain)
-    if os.path.isfile(os.path.join(datadir, chain, ".cookie")):
-        with open(os.path.join(datadir, chain, ".cookie"), 'r', encoding="ascii") as f:
+    if os.path.isfile(os.path.join(datadir, "regtest", ".cookie")):
+        with open(os.path.join(datadir, "regtest", ".cookie"), 'r', encoding="ascii") as f:
             userpass = f.read()
             split_userpass = userpass.split(':')
             user = split_userpass[0]
@@ -366,9 +352,9 @@ def get_auth_cookie(datadir, chain):
         raise ValueError("No RPC credentials")
     return user, password
 
-def copy_datadir(from_node, to_node, dirname, chain):
-    from_datadir = os.path.join(dirname, "node"+str(from_node), chain)
-    to_datadir = os.path.join(dirname, "node"+str(to_node), chain)
+def copy_datadir(from_node, to_node, dirname):
+    from_datadir = os.path.join(dirname, "node"+str(from_node), "regtest")
+    to_datadir = os.path.join(dirname, "node"+str(to_node), "regtest")
 
     dirs = ["blocks", "chainstate", "evodb", "llmq"]
     for d in dirs:
@@ -380,26 +366,10 @@ def copy_datadir(from_node, to_node, dirname, chain):
             pass
 
 # If a cookie file exists in the given datadir, delete it.
-def delete_cookie_file(datadir, chain):
-    chain = get_chain_folder(datadir, chain)
-    if os.path.isfile(os.path.join(datadir, chain, ".cookie")):
+def delete_cookie_file(datadir):
+    if os.path.isfile(os.path.join(datadir, "regtest", ".cookie")):
         logger.debug("Deleting leftover cookie file")
-        os.remove(os.path.join(datadir, chain, ".cookie"))
-
-"""
-since devnets can be named we won't always know what the folders name is unless we would pass it through all functions,
-which shouldn't be needed as if we are to test multiple different devnets we would just override setup_chain and make our own configs files.
-"""
-def get_chain_folder(datadir, chain):
-    # if try fails the directory doesn't exist
-    try:
-        for i in range(len(os.listdir(datadir))):
-            if chain in os.listdir(datadir)[i]:
-                chain = os.listdir(datadir)[i]
-                break
-    except:
-        pass
-    return chain
+        os.remove(os.path.join(datadir, "regtest", ".cookie"))
 
 def get_bip9_status(node, key):
     info = node.getblockchaininfo()
