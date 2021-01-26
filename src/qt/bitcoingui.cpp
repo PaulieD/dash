@@ -1001,7 +1001,7 @@ void BitcoinGUI::showBackups()
 
 void BitcoinGUI::showHelpMessageClicked()
 {
-    helpMessageDialog->show();
+    GUIUtil::bringToFront(helpMessageDialog);
 }
 
 void BitcoinGUI::showCoinJoinHelpClicked()
