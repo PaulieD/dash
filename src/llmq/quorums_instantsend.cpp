@@ -384,18 +384,6 @@ bool CInstantSendManager::ProcessTx(const CTransaction& tx, bool allowReSigning,
         return true;
     }
 
-    // In case the islock was received before the TX, filtered announcement might have missed this islock because
-    // we were unable to check for filter matches deep inside the TX. Now we have the TX, so we should retry.
-    uint256 islockHash;
-    {
-        LOCK(cs);
-        islockHash = db.GetInstantSendLockHashByTxid(tx.GetHash());
-    }
-    if (!islockHash.IsNull()) {
-        CInv inv(MSG_ISLOCK, islockHash);
-        g_connman->RelayInvFiltered(inv, tx, LLMQS_PROTO_VERSION);
-    }
-
     if (!CheckCanLock(tx, true, params)) {
         LogPrint(BCLog::INSTANTSEND, "CInstantSendManager::%s -- txid=%s: CheckCanLock returned false\n", __func__,
                   tx.GetHash().ToString());
