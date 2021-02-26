@@ -618,6 +618,8 @@ void CInstantSendManager::HandleNewInstantSendLockRecoveredSig(const llmq::CReco
         LOCK(cs);
         auto it = creatingInstantSendLocks.find(recoveredSig.id);
         if (it == creatingInstantSendLocks.end()) {
+            // Either we have already processed this recovered sig, or we have
+            // processed the islock for it.
             return;
         }
 
