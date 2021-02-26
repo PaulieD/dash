@@ -1050,7 +1050,7 @@ void CInstantSendManager::RemoveNonLockedTx(const uint256& txid, bool retryChild
     if (it == nonLockedTxs.end()) {
         return;
     }
-    auto& info = it->second;
+    NonLockedTxInfo& info = it->second;
 
     size_t retryChildrenCount = 0;
     if (retryChildren) {
