@@ -635,7 +635,7 @@ void CInstantSendManager::HandleNewInstantSendLockRecoveredSig(const llmq::CReco
     }
 
     islock->sig = recoveredSig.sig;
-    ProcessInstantSendLock(-1, ::SerializeHash(*islock), islock);
+    ProcessInstantSendLock(-1, ::SerializeHash(*islock), islock, true);
 }
 
 void CInstantSendManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv)
@@ -854,7 +854,7 @@ std::unordered_set<uint256> CInstantSendManager::ProcessPendingInstantSendLocks(
     return badISLocks;
 }
 
-void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& hash, const CInstantSendLockPtr& islock)
+void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& hash, const CInstantSendLockPtr& islock, bool skipRemove)
 {
     {
         LOCK(cs);
@@ -862,8 +862,11 @@ void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& has
         LogPrint(BCLog::INSTANTSEND, "CInstantSendManager::%s -- txid=%s, islock=%s: processsing islock, peer=%d\n", __func__,
                  islock->txid.ToString(), hash.ToString(), from);
 
-        creatingInstantSendLocks.erase(islock->GetRequestId());
-        txToCreatingInstantSendLocks.erase(islock->txid);
+        // We might have already removed these, if so we skip this
+        if (!skipRemove) {
+            creatingInstantSendLocks.erase(islock->GetRequestId());
+            txToCreatingInstantSendLocks.erase(islock->txid);
+        }
 
         if (db.KnownInstantSendLock(hash)) {
             return;
