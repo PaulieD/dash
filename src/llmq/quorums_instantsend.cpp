@@ -367,10 +367,6 @@ void CInstantSendManager::InterruptWorkerThread()
 
 bool CInstantSendManager::ProcessTx(const CTransaction& tx, bool allowReSigning, const Consensus::Params& params)
 {
-    if (!IsInstantSendEnabled()) {
-        return true;
-    }
-
     auto llmqType = params.llmqTypeInstantSend;
     if (llmqType == Consensus::LLMQ_NONE) {
         return true;
@@ -720,10 +716,6 @@ bool CInstantSendManager::ProcessPendingInstantSendLocks()
     }
 
     if (pend.empty()) {
-        return false;
-    }
-
-    if (!IsInstantSendEnabled()) {
         return false;
     }
 
@@ -1106,6 +1098,9 @@ void CInstantSendManager::TruncateRecoveredSigsForInputs(const llmq::CInstantSen
 
 void CInstantSendManager::NotifyChainLock(const CBlockIndex* pindexChainLock)
 {
+    if (!IsInstantSendEnabled()) {
+        return;
+    }
     HandleFullyConfirmedBlock(pindexChainLock);
 }
 
@@ -1121,17 +1116,13 @@ void CInstantSendManager::UpdatedBlockTip(const CBlockIndex* pindexNew)
     int nConfirmedHeight = pindexNew->nHeight - Params().GetConsensus().nInstantSendKeepLock;
     const CBlockIndex* pindex = pindexNew->GetAncestor(nConfirmedHeight);
 
-    if (pindex) {
+    if (pindex && IsInstantSendEnabled()) {
         HandleFullyConfirmedBlock(pindex);
     }
 }
 
 void CInstantSendManager::HandleFullyConfirmedBlock(const CBlockIndex* pindex)
 {
-    if (!IsInstantSendEnabled()) {
-        return;
-    }
-
     LOCK(cs);
 
     auto& consensusParams = Params().GetConsensus();
@@ -1343,10 +1334,6 @@ void CInstantSendManager::ProcessPendingRetryLockTxs()
         return;
     }
 
-    if (!IsInstantSendEnabled()) {
-        return;
-    }
-
     int retryCount = 0;
     for (const auto& txid : retryTxs) {
         CTransactionRef tx;
@@ -1485,8 +1472,11 @@ size_t CInstantSendManager::GetInstantSendLockCount() const
 void CInstantSendManager::WorkThreadMain()
 {
     while (!workInterrupt) {
-        bool fMoreWork = ProcessPendingInstantSendLocks();
-        ProcessPendingRetryLockTxs();
+        bool fMoreWork{false};
+        if (IsInstantSendEnabled()) {
+            fMoreWork = ProcessPendingInstantSendLocks();
+            ProcessPendingRetryLockTxs();
+        }
 
         if (!fMoreWork && !workInterrupt.sleep_for(std::chrono::milliseconds(100))) {
             return;
