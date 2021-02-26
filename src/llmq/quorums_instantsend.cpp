@@ -624,8 +624,6 @@ void CInstantSendManager::HandleNewInstantSendLockRecoveredSig(const llmq::CReco
         }
 
         islock = std::make_shared<CInstantSendLock>(std::move(it->second));
-        creatingInstantSendLocks.erase(it);
-        txToCreatingInstantSendLocks.erase(islock->txid);
     }
 
     if (islock->txid != recoveredSig.msgHash) {
@@ -635,7 +633,7 @@ void CInstantSendManager::HandleNewInstantSendLockRecoveredSig(const llmq::CReco
     }
 
     islock->sig = recoveredSig.sig;
-    ProcessInstantSendLock(-1, ::SerializeHash(*islock), islock, true);
+    ProcessInstantSendLock(-1, ::SerializeHash(*islock), islock);
 }
 
 void CInstantSendManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv)
@@ -854,7 +852,7 @@ std::unordered_set<uint256> CInstantSendManager::ProcessPendingInstantSendLocks(
     return badISLocks;
 }
 
-void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& hash, const CInstantSendLockPtr& islock, bool skipRemove)
+void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& hash, const CInstantSendLockPtr& islock)
 {
     {
         LOCK(cs);
@@ -862,11 +860,8 @@ void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& has
         LogPrint(BCLog::INSTANTSEND, "CInstantSendManager::%s -- txid=%s, islock=%s: processsing islock, peer=%d\n", __func__,
                  islock->txid.ToString(), hash.ToString(), from);
 
-        // We might have already removed these, if so we skip this
-        if (!skipRemove) {
-            creatingInstantSendLocks.erase(islock->GetRequestId());
-            txToCreatingInstantSendLocks.erase(islock->txid);
-        }
+        creatingInstantSendLocks.erase(islock->GetRequestId());
+        txToCreatingInstantSendLocks.erase(islock->txid);
 
         if (db.KnownInstantSendLock(hash)) {
             return;
@@ -1066,6 +1061,7 @@ void CInstantSendManager::RemoveNonLockedTx(const uint256& txid, bool retryChild
         }
     }
 
+    // TODO this kinda confuses me, think more.
     if (info.tx) {
         for (const auto& in : info.tx->vin) {
             auto jt = nonLockedTxs.find(in.prevout.hash);
