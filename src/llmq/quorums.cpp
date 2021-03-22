@@ -6,14 +6,12 @@
 #include <llmq/quorums_blockprocessor.h>
 #include <llmq/quorums_dkgsession.h>
 #include <llmq/quorums_dkgsessionmgr.h>
-#include <llmq/quorums_init.h>
 #include <llmq/quorums_utils.h>
 
 #include <evo/specialtx.h>
 
 #include <masternode/activemasternode.h>
 #include <chainparams.h>
-#include <init.h>
 #include <masternode/masternode-sync.h>
 #include <net_processing.h>
 #include <netmessagemaker.h>
