@@ -67,7 +67,6 @@ EXPECTED_CIRCULAR_DEPENDENCIES=(
     "init -> txdb -> init"
     "init -> validation -> init"
     "init -> validationinterface -> init"
-    "llmq/quorums -> llmq/quorums_init -> llmq/quorums"
     "llmq/quorums -> llmq/quorums_utils -> llmq/quorums"
     "llmq/quorums_blockprocessor -> net_processing -> llmq/quorums_blockprocessor"
     "llmq/quorums_chainlocks -> llmq/quorums_instantsend -> llmq/quorums_chainlocks"
@@ -106,20 +105,11 @@ EXPECTED_CIRCULAR_DEPENDENCIES=(
     "httprpc -> httpserver -> init -> httprpc"
     "httpserver -> init -> httpserver"
     "init -> llmq/quorums_init -> llmq/quorums_signing_shares -> init"
-    "init -> llmq/quorums_signing -> llmq/quorums -> init"
     "init -> masternode/masternode-utils -> privatesend/privatesend-client -> init"
-    "llmq/quorums -> llmq/quorums_init -> llmq/quorums_chainlocks -> llmq/quorums"
-    "llmq/quorums -> llmq/quorums_init -> llmq/quorums_signing -> llmq/quorums"
-    "llmq/quorums -> llmq/quorums_init -> llmq/quorums_signing_shares -> llmq/quorums"
-    "llmq/quorums_blockprocessor -> net_processing -> llmq/quorums_init -> llmq/quorums_blockprocessor"
-    "llmq/quorums_chainlocks -> net_processing -> llmq/quorums_init -> llmq/quorums_chainlocks"
     "llmq/quorums_chainlocks -> net -> privatesend/privatesend -> llmq/quorums_chainlocks"
     "llmq/quorums_chainlocks -> net_processing -> validationinterface -> llmq/quorums_chainlocks"
     "llmq/quorums_chainlocks -> llmq/quorums_instantsend -> wallet/wallet -> llmq/quorums_chainlocks"
     "llmq/quorums_dkgsession -> llmq/quorums_dkgsessionmgr -> llmq/quorums_dkgsessionhandler -> llmq/quorums_dkgsession"
-    "llmq/quorums_dkgsessionhandler -> llmq/quorums_init -> llmq/quorums_dkgsessionmgr -> llmq/quorums_dkgsessionhandler"
-    "llmq/quorums_dkgsessionmgr -> net_processing -> llmq/quorums_init -> llmq/quorums_dkgsessionmgr"
-    "llmq/quorums_init -> llmq/quorums_instantsend -> net_processing -> llmq/quorums_init"
     "llmq/quorums_instantsend -> wallet/wallet -> privatesend/privatesend -> llmq/quorums_instantsend"
     "llmq/quorums_instantsend -> net_processing -> privatesend/privatesend-server -> llmq/quorums_instantsend"
     "llmq/quorums_instantsend -> net_processing -> validationinterface -> llmq/quorums_instantsend"
@@ -152,6 +142,8 @@ EXPECTED_CIRCULAR_DEPENDENCIES=(
     "evo/providertx -> evo/specialtx -> llmq/quorums_blockprocessor -> net_processing -> privatesend/privatesend-server -> masternode/activemasternode -> evo/providertx"
     "evo/providertx -> evo/specialtx -> llmq/quorums_blockprocessor -> net_processing -> privatesend/privatesend-client -> privatesend/privatesend-util -> wallet/wallet -> evo/providertx"
     "core_io -> evo/cbtx -> llmq/quorums_blockprocessor -> net_processing -> privatesend/privatesend-client -> privatesend/privatesend-util -> wallet/wallet -> governance/governance-object -> core_io"
+
+    "llmq/quorums -> llmq/quorums_dkgsessionmgr -> llmq/quorums_dkgsessionhandler -> llmq/quorums"
 )
 
 EXIT_CODE=0
