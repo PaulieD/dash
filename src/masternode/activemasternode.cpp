@@ -4,10 +4,15 @@
 
 #include <masternode/activemasternode.h>
 #include <masternode/masternode-sync.h>
+
+#include <evo/deterministicmns.h>
+
 #include <netbase.h>
 #include <protocol.h>
 #include <validation.h>
 #include <warnings.h>
+
+#include <bls/bls.h>
 
 // Keep track of the active Masternode
 CActiveMasternodeInfo activeMasternodeInfo;

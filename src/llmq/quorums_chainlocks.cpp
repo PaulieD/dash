@@ -7,12 +7,12 @@
 #include <llmq/quorums_utils.h>
 
 #include <chain.h>
+#include <consensus/validation.h>
 #include <masternode/masternode-sync.h>
 #include <net_processing.h>
 #include <scheduler.h>
 #include <spork.h>
 #include <txmempool.h>
-#include <validation.h>
 
 namespace llmq
 {

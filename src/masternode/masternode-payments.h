@@ -11,8 +11,6 @@
 #include <net_processing.h>
 #include <utilstrencodings.h>
 
-#include <evo/deterministicmns.h>
-
 class CMasternodePayments;
 
 /// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)

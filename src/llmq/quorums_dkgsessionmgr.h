@@ -6,12 +6,14 @@
 #define BITCOIN_LLMQ_QUORUMS_DKGSESSIONMGR_H
 
 #include <llmq/quorums_dkgsessionhandler.h>
-
-#include <validation.h>
+#include <llmq/quorums_dkgsession.h>
+#include <bls/bls.h>
+#include <bls/bls_worker.h>
 
 #include <ctpl.h>
 
 class UniValue;
+class CBlockIndex;
 
 namespace llmq
 {
