@@ -190,6 +190,7 @@ BASE_SCRIPTS = [
     'feature_asmap.py',
     'feature_includeconf.py',
     'feature_logging.py',
+    'feature_anchors.py',
     'p2p_node_network_limited.py',
     'feature_blocksdir.py',
     'feature_config_args.py',
