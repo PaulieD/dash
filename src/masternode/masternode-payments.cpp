@@ -2,13 +2,13 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <masternode/activemasternode.h>
-#include <governance/governance-classes.h>
 #include <masternode/masternode-payments.h>
-#include <masternode/masternode-sync.h>
+
+#include <chainparams.h>
 #include <evo/deterministicmns.h>
-#include <netfulfilledman.h>
-#include <netmessagemaker.h>
+#include <governance/governance-classes.h>
+#include <logging.h>
+#include <masternode/masternode-sync.h>
 #include <validation.h>
 
 #include <string>

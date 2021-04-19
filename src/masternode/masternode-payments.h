@@ -5,6 +5,15 @@
 #ifndef BITCOIN_MASTERNODE_MASTERNODE_PAYMENTS_H
 #define BITCOIN_MASTERNODE_MASTERNODE_PAYMENTS_H
 
+#include <amount.h>
+#include <string>
+#include <vector>
+
+class CBlock;
+class CTransaction;
+class CTxOut;
+class CMutableTransaction;
+
 class CMasternodePayments;
 
 /// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)

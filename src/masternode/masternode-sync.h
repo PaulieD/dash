@@ -4,9 +4,14 @@
 #ifndef BITCOIN_MASTERNODE_MASTERNODE_SYNC_H
 #define BITCOIN_MASTERNODE_MASTERNODE_SYNC_H
 
+#include <cstdint>
+#include <string>
+
 class CMasternodeSync;
+
 class CBlockIndex;
 class CConnman;
+class CDataStream;
 class CNode;
 
 static const int MASTERNODE_SYNC_BLOCKCHAIN      = 1;

@@ -3,16 +3,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <masternode/masternode-utils.h>
-#include <evo/deterministicmns.h>
 
-#ifdef ENABLE_WALLET
-#include <coinjoin/coinjoin-client.h>
-#endif
+#include <evo/deterministicmns.h>
 #include <init.h>
 #include <masternode/masternode-sync.h>
 #include <net.h>
 #include <validation.h>
 
+#ifdef ENABLE_WALLET
+#include <coinjoin/coinjoin-client.h>
+#endif
 
 void CMasternodeUtils::ProcessMasternodeConnections(CConnman& connman)
 {

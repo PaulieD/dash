@@ -6,15 +6,16 @@
 #define BITCOIN_MASTERNODE_MASTERNODE_META_H
 
 #include <serialize.h>
-
+#include <sync.h>
+#include <uint256.h>
 #include <univalue.h>
 
-#include <uint256.h>
-#include <sync.h>
+#include <map>
+#include <memory>
 
 class CConnman;
 
-static const int MASTERNODE_MAX_MIXING_TXES             = 5;
+static const int MASTERNODE_MAX_MIXING_TXES = 5;
 
 // Holds extra (non-deterministic) information about masternodes
 // This is mostly local information, e.g. about mixing and governance

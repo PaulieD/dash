@@ -6,13 +6,12 @@
 
 #include <evo/deterministicmns.h>
 
+#include <logging.h>
 #include <net.h>
 #include <netbase.h>
 #include <protocol.h>
 #include <validation.h>
-#include <warnings.h>
-
-#include <bls/bls.h>
+#include <util.h>
 
 // Keep track of the active Masternode
 CActiveMasternodeInfo activeMasternodeInfo;
