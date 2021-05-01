@@ -98,7 +98,7 @@ static void BLS_Sign_Normal(benchmark::Bench& bench)
     secKey.MakeNewKey();
 
     // Benchmark.
-    bench.minEpochIterations(100).run([&] {
+    bench.minEpochIterations(1000).run([&] {
         uint256 hash = GetRandHash();
         secKey.Sign(hash);
     });
