@@ -231,7 +231,7 @@ static void BLS_Verify_LargeAggregatedBlock1000PreVerified(benchmark::Bench& ben
     }
 
     // Benchmark.
-    bench.run([&] {
+    bench.minEpochIterations(10).run([&] {
         BLSPublicKeyVector nonvalidatedPubKeys;
         std::vector<uint256> nonvalidatedHashes;
         nonvalidatedPubKeys.reserve(pubKeys.size());
