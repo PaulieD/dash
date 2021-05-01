@@ -60,7 +60,7 @@ static void BLS_PubKeyAggregate_Normal(benchmark::Bench& bench)
     CBLSPublicKey pubKey2 = secKey2.GetPublicKey();
 
     // Benchmark.
-    bench.run([&] {
+    bench.minEpochIterations(100).run([&] {
         pubKey1.AggregateInsecure(pubKey2);
     });
 }
