@@ -86,6 +86,8 @@ int main(int argc, char** argv)
     args.output_csv = gArgs.GetArg("-output_csv", "");
     args.output_json = gArgs.GetArg("-output_json", "");
 
+    benchmark::BenchRunner::RunAll(args);
+
     fs::remove_all(bench_datadir);
 
     // need to be called before global destructors kick in (PoolAllocator is needed due to many BLSSecretKeys)

@@ -98,7 +98,7 @@ static void BLS_Sign_Normal(benchmark::Bench& bench)
     secKey.MakeNewKey();
 
     // Benchmark.
-    bench.run([&] {
+    bench.minEpochIterations(100).run([&] {
         uint256 hash = GetRandHash();
         secKey.Sign(hash);
     });
@@ -115,7 +115,7 @@ static void BLS_Verify_Normal(benchmark::Bench& bench)
 
     // Benchmark.
     size_t i = 0;
-    bench.run([&] {
+    bench.batch(pubKeys.size()).unit("byte").minEpochIterations(20).run([&] {
         bool valid = sigs[i].VerifyInsecure(pubKeys[i], msgHashes[i]);
         if (valid && invalid[i]) {
             std::cout << "expected invalid but it is valid" << std::endl;
@@ -194,7 +194,7 @@ static void BLS_Verify_LargeAggregatedBlock(size_t txCount, benchmark::Bench& be
     CBLSSignature aggSig = CBLSSignature::AggregateInsecure(sigs);
 
     // Benchmark.
-    bench.run([&] {
+    bench.minEpochIterations(10).run([&] {
         aggSig.VerifyInsecureAggregated(pubKeys, msgHashes);
     });
 }
@@ -268,7 +268,7 @@ static void BLS_Verify_Batched(benchmark::Bench& bench)
     size_t i = 0;
     size_t j = 0;
     size_t batchSize = 16;
-    bench.run([&] {
+    bench.minEpochIterations(1000).run([&] {
         j++;
         if ((j % batchSize) != 0) {
             return;
@@ -329,7 +329,7 @@ static void BLS_Verify_BatchedParallel(benchmark::Bench& bench)
 
     // Benchmark.
     size_t i = 0;
-    bench.run([&] {
+    bench.minEpochIterations(1000).run([&] {
         if (futures.size() < 100) {
             while (futures.size() < 10000) {
                 auto f = blsWorker.AsyncVerifySig(sigs[i], pubKeys[i], msgHashes[i], cancelCond);
