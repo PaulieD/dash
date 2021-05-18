@@ -355,6 +355,24 @@ void CDeterministicMNList::PoSeDecrease(const uint256& proTxHash)
     UpdateMN(proTxHash, newState);
 }
 
+void CDeterministicMNList::Layer2Ban(const uint256& proTxHash, int height, bool debugLogs)
+{
+    auto dmn = GetMN(proTxHash);
+    if (!dmn) {
+        throw(std::runtime_error(strprintf("%s: Can't find a masternode with proTxHash=%s", __func__, proTxHash.ToString())));
+    }
+
+    auto newState = std::make_shared<CDeterministicMNState>(*dmn->pdmnState);
+    newState->Layer2Ban(height);
+
+    if (debugLogs) {
+        LogPrintf("CDeterministicMNList::%s -- layer2ban for MN %s\n",
+                  __func__, proTxHash.ToString());
+    }
+
+    UpdateMN(proTxHash, newState);
+}
+
 CDeterministicMNListDiff CDeterministicMNList::BuildDiff(const CDeterministicMNList& to) const
 {
     CDeterministicMNListDiff diffRet;

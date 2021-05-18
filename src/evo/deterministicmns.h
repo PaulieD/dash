@@ -29,7 +29,7 @@ class CDeterministicMNState
 {
 private:
     int nPoSeBanHeight{-1};
-    bool PlatformBan{false};
+    int nL2PoSeBanHeight{-1};
 
     friend class CDeterministicMNStateDiff;
 
@@ -38,6 +38,7 @@ public:
     int nLastPaidHeight{0};
     int nPoSePenalty{0};
     int nPoSeRevivedHeight{-1};
+    int nL2PoSeRevivedHeight{-1};
     uint16_t nRevocationReason{CProUpRevTx::REASON_NOT_SPECIFIED};
 
     // the block hash X blocks after registration, used in quorum calculations
@@ -103,20 +104,35 @@ public:
             nPoSeBanHeight = height;
         }
     }
+    void Layer2Ban(int height)
+    {
+        if (!IsL2Banned() && height >= nL2PoSeRevivedHeight) {
+            nL2PoSeBanHeight = height;
+        }
+    }
     int GetBannedHeight() const
     {
         return nPoSeBanHeight;
+    }
+    int GetL2BannedHeight() const
+    {
+        return nL2PoSeBanHeight;
     }
     bool IsBanned() const
     {
         return nPoSeBanHeight != -1;
     }
+    bool IsL2Banned() const
+    {
+        return nL2PoSeBanHeight != -1;
+    }
     void Revive(int nRevivedHeight)
     {
         nPoSePenalty = 0;
         nPoSeBanHeight = -1;
-        PlatformBan = false;
+        nL2PoSeBanHeight = -1;
         nPoSeRevivedHeight = nRevivedHeight;
+        nL2PoSeRevivedHeight = nRevivedHeight;
     }
     void UpdateConfirmedHash(const uint256& _proTxHash, const uint256& _confirmedHash)
     {
@@ -486,6 +502,8 @@ public:
      * @param proTxHash
      */
     void PoSeDecrease(const uint256& proTxHash);
+
+    void Layer2Ban(const uint256 &proTxHash, int height, bool debugLogs);
 
     CDeterministicMNListDiff BuildDiff(const CDeterministicMNList& to) const;
     CSimplifiedMNListDiff BuildSimplifiedDiff(const CDeterministicMNList& to) const;

@@ -1286,11 +1286,41 @@ UniValue _bls(const JSONRPCRequest& request)
     }
 }
 
+UniValue layer2ban(const JSONRPCRequest& request)
+{
+    if (request.fHelp && request.params.empty()) {
+        bls_help();
+    }
+
+    if (request.params[0].isNull()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "no protxhash given");
+    }
+
+    uint256 protx_hash = ParseHashV(request.params[0], "proTxHash");
+
+    int block_height{-1};
+    if (!request.params[1].isNull()) {
+        block_height = ParseInt32V(request.params[1], "block_height");
+    }
+
+    if (block_height < 1 || block_height > chainActive.Height()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid height specified");
+    }
+
+    CDeterministicMNList mnList;
+    {
+        LOCK(cs_main);
+        mnList = deterministicMNManager->GetListForBlock(chainActive[block_height]);
+    }
+    mnList.Layer2Ban(protx_hash, block_height, true);
+}
+
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)
   //  --------------------- ------------------------  -----------------------
     { "evo",                "bls",                    &_bls,                   {}  },
     { "evo",                "protx",                  &protx,                  {}  },
+    { "evo",                "layer2ban",              &layer2ban,              {}  },
 };
 
 void RegisterEvoRPCCommands(CRPCTable &tableRPC)
