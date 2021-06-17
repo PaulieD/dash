@@ -1108,7 +1108,7 @@ bool CConnman::AttemptToEvictConnection()
                 }
                 // if MNAUTH was valid, the node is always protected (and at the same time not accounted when
                 // checking incoming connection limits)
-                if (!node->verifiedProRegTxHash.IsNull()) {
+                if (!node->GetVerifiedProRegTxHash().IsNull()) {
                     isProtected = true;
                 }
                 if (isProtected) {
@@ -1198,7 +1198,7 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket) {
         for (const CNode* pnode : vNodes) {
             if (pnode->fInbound) {
                 nInbound++;
-                if (!pnode->verifiedProRegTxHash.IsNull()) {
+                if (!pnode->GetVerifiedProRegTxHash().IsNull()) {
                     nVerifiedInboundMasternodes++;
                 }
             }
@@ -2408,8 +2408,9 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
         {
             LOCK(cs_vNodes);
             for (CNode* pnode : vNodes) {
-                if (!pnode->verifiedProRegTxHash.IsNull()) {
-                    setConnectedMasternodes.emplace(pnode->verifiedProRegTxHash);
+                auto verifiedProRegTxHash = pnode->GetVerifiedProRegTxHash();
+                if (!verifiedProRegTxHash.IsNull()) {
+                    setConnectedMasternodes.emplace(verifiedProRegTxHash);
                 }
             }
         }
@@ -2632,9 +2633,10 @@ void CConnman::ThreadOpenMasternodeConnections()
         std::set<CService> connectedNodes;
         std::map<uint256, bool> connectedProRegTxHashes;
         ForEachNode([&](const CNode* pnode) {
+            auto verifiedProRegTxHash = pnode->GetVerifiedProRegTxHash();
             connectedNodes.emplace(pnode->addr);
-            if (!pnode->verifiedProRegTxHash.IsNull()) {
-                connectedProRegTxHashes.emplace(pnode->verifiedProRegTxHash, pnode->fInbound);
+            if (!verifiedProRegTxHash.IsNull()) {
+                connectedProRegTxHashes.emplace(verifiedProRegTxHash, pnode->fInbound);
             }
         });
 
@@ -3519,7 +3521,8 @@ void CConnman::SetMasternodeQuorumRelayMembers(Consensus::LLMQType llmqType, con
 
     // Update existing connections
     ForEachNode([&](CNode* pnode) {
-        if (!pnode->verifiedProRegTxHash.IsNull() && !pnode->m_masternode_iqr_connection && IsMasternodeQuorumRelayMember(pnode->verifiedProRegTxHash)) {
+        auto verifiedProRegTxHash = pnode->GetVerifiedProRegTxHash();
+        if (!verifiedProRegTxHash.IsNull() && !pnode->m_masternode_iqr_connection && IsMasternodeQuorumRelayMember(verifiedProRegTxHash)) {
             // Tell our peer that we're interested in plain LLMQ recovered signatures.
             // Otherwise the peer would only announce/send messages resulting from QRECSIG,
             // e.g. InstantSend locks or ChainLocks. SPV and regular full nodes should not send
@@ -3564,7 +3567,8 @@ std::set<NodeId> CConnman::GetMasternodeQuorumNodes(Consensus::LLMQType llmqType
         if (pnode->fDisconnect) {
             continue;
         }
-        if (!pnode->qwatch && (pnode->verifiedProRegTxHash.IsNull() || !proRegTxHashes.count(pnode->verifiedProRegTxHash))) {
+        auto verifiedProRegTxHash = pnode->GetVerifiedProRegTxHash();
+        if (!pnode->qwatch && (verifiedProRegTxHash.IsNull() || !proRegTxHashes.count(verifiedProRegTxHash))) {
             continue;
         }
         nodes.emplace(pnode->GetId());
@@ -3584,7 +3588,7 @@ bool CConnman::IsMasternodeQuorumNode(const CNode* pnode)
     // Let's see if this is an outgoing connection to an address that is known to be a masternode
     // We however only need to know this if the node did not authenticate itself as a MN yet
     uint256 assumedProTxHash;
-    if (pnode->verifiedProRegTxHash.IsNull() && !pnode->fInbound) {
+    if (pnode->GetVerifiedProRegTxHash().IsNull() && !pnode->fInbound) {
         auto mnList = deterministicMNManager->GetListAtChainTip();
         auto dmn = mnList.GetMNByService(pnode->addr);
         if (dmn == nullptr) {
@@ -3596,8 +3600,8 @@ bool CConnman::IsMasternodeQuorumNode(const CNode* pnode)
 
     LOCK(cs_vPendingMasternodes);
     for (const auto& p : masternodeQuorumNodes) {
-        if (!pnode->verifiedProRegTxHash.IsNull()) {
-            if (p.second.count(pnode->verifiedProRegTxHash)) {
+        if (!pnode->GetVerifiedProRegTxHash().IsNull()) {
+            if (p.second.count(pnode->GetVerifiedProRegTxHash())) {
                 return true;
             }
         } else if (!assumedProTxHash.IsNull()) {
