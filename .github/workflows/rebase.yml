@@ -1,0 +1,32 @@
+name: Automatic Rebase
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+#  pull-requests: write
+  # Enforce other not needed permissions are off
+#  actions: none
+#  checks: none
+#  deployments: none
+#  issues: none
+#  #metadata: read
+#  packages: none
+#  repository-projects: none
+#  security-events: none
+#  statuses: none
+jobs:
+  rebase:
+    name: Rebase
+    if: (github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'OWNER') && github.event.issue.pull_request != '' && contains(github.event.comment.body, '/rebase')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the latest code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+      - name: Automatic Rebase
+        uses: PastaPastaPasta/rebase@1.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
