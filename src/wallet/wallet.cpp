@@ -49,7 +49,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10;
+static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10; // Test one
 
 static CCriticalSection cs_wallets;
 static std::vector<std::shared_ptr<CWallet>> vpwallets GUARDED_BY(cs_wallets);
