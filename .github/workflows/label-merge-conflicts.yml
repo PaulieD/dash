@@ -16,7 +16,7 @@ permissions:
   checks: none
   deployments: none
   issues: none
-  metadata: read
+  #metadata: read
   packages: none
   repository-projects: none
   security-events: none
