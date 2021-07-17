@@ -4,7 +4,7 @@ on:
     types: [created]
 permissions:
   contents: write
-  pull-requests: write
+#  pull-requests: write
   # Enforce other not needed permissions are off
 #  actions: none
 #  checks: none
