@@ -4,17 +4,17 @@ on:
     types: [created]
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: read
+  #contents: write
+  #pull-requests: write
+  #issues: read
   # Enforce other not needed permissions are off
-  actions: none
-  checks: none
-  deployments: none
-  packages: none
-  repository-projects: none
-  security-events: none
-  statuses: none
+  #actions: none
+  #checks: none
+  #deployments: none
+  #packages: none
+  #repository-projects: none
+  #security-events: none
+  #statuses: none
 
 jobs:
   rebase:
