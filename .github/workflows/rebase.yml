@@ -3,7 +3,7 @@ on:
   issue_comment:
     types: [created]
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   # Enforce other not needed permissions are off
 #  actions: none
