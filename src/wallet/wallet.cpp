@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
+// Copyright (c) 2009-2010 Satoshi
 // Copyright (c) 2009-2015 The Bitcoin Core developers
 // Copyright (c) 2014-2021 The Dash Core developers
 // Distributed under the MIT software license, see the accompanying
@@ -49,7 +49,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10;
+static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10; // Test one
 
 static CCriticalSection cs_wallets;
 static std::vector<std::shared_ptr<CWallet>> vpwallets GUARDED_BY(cs_wallets);
