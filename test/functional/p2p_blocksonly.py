@@ -27,12 +27,12 @@ class P2PBlocksOnly(BitcoinTestFramework):
                 'vout': 0
             }],
             outputs=[{
-                self.nodes[0].get_deterministic_priv_key().address: 50 - 0.00125
+                self.nodes[0].get_deterministic_priv_key()[0]: 500 - 0.00125
             }],
         )
         sigtx = self.nodes[0].signrawtransactionwithkey(
             hexstring=rawtx,
-            privkeys=[self.nodes[0].get_deterministic_priv_key().key],
+            privkeys=[self.nodes[0].get_deterministic_priv_key()[1]],
             prevtxs=[{
                 'txid': prevtx['txid'],
                 'vout': 0,
